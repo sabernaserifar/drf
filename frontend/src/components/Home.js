@@ -1,21 +1,18 @@
-import {useState} from "react";
-
+import { useState, useEffect } from "react";
 import useFetch from "./useFetch";
+import PurchaseList from "./PurchaseList";
 
 const Home = () => {
-  const { error, isPending, data: blogs } = useFetch('http://localhost:8000/api/purchases')
-    console.log(blogs)
+  const {data: blogs, isPending, error} = useFetch("/api/purchases/")
 
   return (
     <div className="home">
-      <p>Hi</p>
-      {/*{ error && <div>{ error }</div> }*/}
-      {/*{ isPending && <div>Loading...</div> }*/}
-        {/*{blogs}*/}
-      {/*{ blogs && <BlogList blogs={blogs} /> }*/}
+        {error && <div>{ error }</div>}
+        {isPending && <h2>Loading...</h2>}
+        {blogs && <PurchaseList blogs={blogs} title="All Materials"/>}
+
     </div>
   );
 }
 
 export default Home;
-

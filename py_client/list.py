@@ -3,7 +3,7 @@ import json
 
 
 
-endpoint = 'http://127.0.0.1:8000/api/purchases/'
+endpoint = 'http://localhost:8000/api/purchases/7'
 
 
 data = {
@@ -11,10 +11,10 @@ data = {
 
 }
 
-r = requests.get(endpoint, json=data)
+r = requests.get(endpoint)
 
-print(r.headers)
-print(r.text)
+print(r)
+#print(r.text)
 #dict = json.loads(r.content)
 # #print(r.headers)
 #print(dict['results'])
