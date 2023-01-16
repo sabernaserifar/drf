@@ -72,4 +72,8 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 ### Notes:
 - StrictMode renders components twice (on dev but not production) in order to detect any problems with your code and warn you about them (which can be quite useful).
-- npm install react-router-dom@5
+- npm install react-router-dom@5 
+- npm install axios
+- npm install @mui/material/core
+- npm install @material-ui/icons
+- npm i --save material-ui-search-bar

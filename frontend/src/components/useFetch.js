@@ -21,7 +21,7 @@ const useFetch = (url, detail=false) => {
         if (detail) {
           setData(data);
         }else{
-          setData(data['results']);
+          setData(data);
         }
         setError(null);
       })

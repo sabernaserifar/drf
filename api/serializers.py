@@ -1,17 +1,41 @@
 from rest_framework import serializers
 from .models import Purchase
 from django.contrib.auth.models import User
+from api.models import NewUser
 
 
-class PurchaseSerializer(serializers.HyperlinkedModelSerializer):
+class PurchaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Purchase
-        fields = ['id', 'url', 'user', 'title', 'description', 'active', 'order_time', 'delivery_time']
+        fields = '__all__'
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    purchases = serializers.HyperlinkedRelatedField(many=True, view_name='purchase-detail', read_only=True)
+# class UserSerializer(serializers.ModelSerializer):
+#     purchases = serializers.PrimaryKeyRelatedField(many=True, view_name='purchase-detail', read_only=True)
+#
+#     class Meta:
+#         model = User
+#         fields = ['url', 'id', 'username', 'purchases']
+
+
+class CustomUserSerializer(serializers.ModelSerializer):
+    """
+    Currently unused in preference of the below.
+    """
+    email = serializers.EmailField(required=True)
+    user_name = serializers.CharField(required=True)
+    password = serializers.CharField(min_length=8, write_only=True)
 
     class Meta:
-        model = User
-        fields = ['url', 'id', 'username', 'purchases']
+        model = NewUser
+        fields = ('email', 'user_name', 'password')
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        # as long as the fields are the same, we can just use this
+        instance = self.Meta.model(**validated_data)
+        if password is not None:
+            instance.set_password(password)
+        instance.save()
+        return instance
