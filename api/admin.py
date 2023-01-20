@@ -1,12 +1,20 @@
 from django.contrib import admin
-from .models import Purchase, NewUser
+from .models import Purchase, PurchaseItem, NewUser
 from django.contrib.auth.admin import UserAdmin
 from django.forms import Textarea
 from django.db import models
 
 
+class PurchaseItemsInline(admin.StackedInline):
+    model = PurchaseItem
+    extra = 0
+    # readonly_fields = ['quantity_as_float', 'as_metric', 'as_imperial', 'convert_to_system']
+    #fields = ['name', 'quantity', 'unit', 'quantity_as_float']
+
+
 @admin.register(Purchase)
 class PurchaseAdmin(admin.ModelAdmin):
+    inlines = [PurchaseItemsInline]
     list_display = ['title', 'updated', 'author']
     readonly_fields = ['timestamp', 'updated']
     #raw_id_fields = ['author']

@@ -19,6 +19,28 @@ class Purchase(models.Model):
         ordering = ['updated']
 
 
+class PurchaseItem(models.Model):
+    """
+    Purchase items
+    """
+    purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
+    name = models.CharField(max_length=250)
+    description = models.TextField(blank=True, null=True)
+    quantity = models.CharField(max_length=50)
+    ##TODO is it better to perfrom a full_clean() validation like unit instead to avoid nonsense input?
+    # quantity_as_float = models.FloatField(blank=True, null=True)
+    ##TODO the validators are not run on .save() but when full_clean() is called.
+    unit = models.CharField(max_length=50)  # pounds, lbs, gr, liter, gallon
+    timestamp = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    # active = models.BooleanField(default=True)
+    # external_product_id = models.CharField(max_length=250)
+    # price = models.DecimalField(max_digits=6, decimal_places=2)
+    # documentation_bucket = models.TextField()
+    # documentation_bucket_path = models.TextField()
+    # customer_name = models.CharField(max_length=250)
+
+
 class CustomAccountManager(BaseUserManager):
 
     def create_superuser(self, email, user_name, first_name, password, **other_fields):

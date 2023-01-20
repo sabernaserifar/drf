@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Purchase
+from .models import Purchase, PurchaseItem
 from django.contrib.auth.models import User
 from api.models import NewUser
 
@@ -8,6 +8,22 @@ class PurchaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Purchase
         fields = '__all__'
+
+class PurchaseItemSerializer(serializers.ModelSerializer):
+    #Purchase = PurchaseSerializer()
+    parent_id = serializers.IntegerField(required=False)
+    class Meta:
+        model = PurchaseItem
+        fields = '__all__'
+        extra_kwargs = {
+            'purchase': {'allow_null': True, 'required': False},
+            # 'Last_Name': {'allow_null': True, 'allow_blank': True, 'required': False},
+            # 'First_Name': {'allow_null': True, 'required': False, 'allow_blank': True},
+        }
+
+    def create(self, validated_data):
+        validated_data.pop('parent_id', None)
+        return super().create(validated_data)
 
 
 # class UserSerializer(serializers.ModelSerializer):

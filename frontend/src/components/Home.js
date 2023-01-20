@@ -1,19 +1,16 @@
 import { useState, useEffect } from "react";
 import PurchaseList from "./purchases/PurchaseList";
-import PurchaseList2 from "./purchases/admin/purchases";
 import PostLoadingComponent from './postLoading';
 import axiosInstance from "./axios";
 
 
 const Home = () => {
-	const PostLoading = PostLoadingComponent(PurchaseList2);
+	const PostLoading = PostLoadingComponent(PurchaseList);
 	const [appState, setAppState] = useState({
 		loading: true,
 		posts: null,
 	});
-
-	console.log(localStorage)
-
+	// Change the purchases to the materials inventory
 	useEffect(() => {
 		axiosInstance.get(`purchases/`).then((res) => {
 			const allPosts = res.data;
