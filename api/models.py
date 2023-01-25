@@ -3,6 +3,13 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from simple_history.models import HistoricalRecords
+
+
+
+
 
 
 class Purchase(models.Model):
@@ -23,7 +30,7 @@ class PurchaseItem(models.Model):
     """
     Purchase items
     """
-    purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
+    purchase = models.ForeignKey(Purchase, related_name='purchase_items', on_delete=models.CASCADE)
     name = models.CharField(max_length=250)
     description = models.TextField(blank=True, null=True)
     quantity = models.CharField(max_length=50)
@@ -39,6 +46,9 @@ class PurchaseItem(models.Model):
     # documentation_bucket = models.TextField()
     # documentation_bucket_path = models.TextField()
     # customer_name = models.CharField(max_length=250)
+
+    def __str__(self):
+        return f'{self.id}:{self.name}:{self.quantity}:{self.unit}'
 
 
 class CustomAccountManager(BaseUserManager):

@@ -53,6 +53,17 @@ function Header() {
 							href="#"
 							className={classes.link}
 							component={NavLink}
+							to="/purchases"
+						>
+							Purchases
+						</Link>
+					</nav>
+					<nav>
+						<Link
+							color="textPrimary"
+							href="#"
+							className={classes.link}
+							component={NavLink}
 							to="/register"
 						>
 							Register

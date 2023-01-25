@@ -4,7 +4,10 @@ from django.contrib.auth.models import User
 from api.models import NewUser
 
 
-class PurchaseSerializer(serializers.ModelSerializer):
+class PurchaseSerializer(serializers.ModelSerializer, serializers.RelatedField):
+    #purchases = serializers.PrimaryKeyRelatedField(many=True)
+    purchase_items = serializers.StringRelatedField(many=True, required=False)
+    # purchase_items = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     class Meta:
         model = Purchase
         fields = '__all__'
@@ -16,9 +19,7 @@ class PurchaseItemSerializer(serializers.ModelSerializer):
         model = PurchaseItem
         fields = '__all__'
         extra_kwargs = {
-            'purchase': {'allow_null': True, 'required': False},
-            # 'Last_Name': {'allow_null': True, 'allow_blank': True, 'required': False},
-            # 'First_Name': {'allow_null': True, 'required': False, 'allow_blank': True},
+            'purchase': {'allow_null': True, 'required': False}
         }
 
     def create(self, validated_data):

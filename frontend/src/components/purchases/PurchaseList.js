@@ -1,6 +1,6 @@
 // import {Link} from "react-router-dom";
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import {makeStyles} from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Link from '@material-ui/core/Link';
 import Paper from '@material-ui/core/Paper';
@@ -14,6 +14,7 @@ import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import EditIcon from '@material-ui/icons/Edit';
 import Button from '@material-ui/core/Button';
 
+//TODO: move style sheets single file
 const useStyles = makeStyles((theme) => ({
 	cardMedia: {
 		paddingTop: '56.25%', // 16:9
@@ -42,10 +43,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
+
 const BlogList = ({ posts, title}) => {
   	// const { posts } = props;
 	const classes = useStyles();
 	if (!posts || posts.length === 0) return <p>Can not find any posts, sorry</p>;
+
 	return (
 		<React.Fragment>
 			<Container maxWidth="md" component="main">
@@ -63,7 +66,7 @@ const BlogList = ({ posts, title}) => {
 							<TableBody>
 								{posts.map((post) => {
 									return (
-										<TableRow>
+										<TableRow key={post.id}>
 											<TableCell component="th" scope="row">
 												{post.id}
 											</TableCell>
@@ -87,13 +90,13 @@ const BlogList = ({ posts, title}) => {
 												>
 													<EditIcon></EditIcon>
 												</Link>
-												{/*<Link*/}
-												{/*	color="textPrimary"*/}
-												{/*	href={'/purchases/delete/' + post.id}*/}
-												{/*	className={classes.link}*/}
-												{/*>*/}
-												{/*	<DeleteForeverIcon></DeleteForeverIcon>*/}
-												{/*</Link>*/}
+												<Link
+													color="textPrimary"
+													href={'/purchases/delete/' + post.id}
+													className={classes.link}
+												>
+													<DeleteForeverIcon></DeleteForeverIcon>
+												</Link>
 											</TableCell>
 										</TableRow>
 									);
@@ -101,7 +104,7 @@ const BlogList = ({ posts, title}) => {
 								<TableRow>
 									<TableCell colSpan={4} align="right">
 										<Button
-											href={'/purchases/create'}
+											href={'/purchases/'}
 											variant="contained"
 											color="primary"
 										>

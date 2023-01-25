@@ -1,20 +1,17 @@
 import './index.css';
-import {
-    BrowserRouter,
-    Routes,
-    Route
-} from "react-router-dom";
-import Navbar from './components/Navbar'
+import {BrowserRouter, Route, Routes} from "react-router-dom";
 import Header from "./components/header";
-import Footer from "./components/footer";
 import Home from './components/Home';
 import Register from './components/register';
+import PurchaseList from "./components/purchases/PurchaseList";
 import PurchaseCreate from "./components/purchases/PurchaseCreate";
 import PurchaseDetail from "./components/purchases/PurchaseDetail";
+import PurchaseEdit from "./components/purchases/PurchasesEdit";
+import PurchaseDelete from "./components/purchases/PurchaseDelete";
+import PurchaseItemDetail from "./components/purchases/items/PurchaseItemDetail";
 
 import Login from "./components/login";
 import Logout from "./components/logout";
-import Edit from "./components/purchases/admin/edit";
 
 function App() {
   return (
@@ -27,9 +24,15 @@ function App() {
                   <Route exact path="/register" element={<Register/>}></Route>
                   <Route exact path="/login" element={<Login/>}></Route>
                   <Route exact path="/logout" element={<Logout/>}></Route>
-                  <Route path="/purchases/" element={<PurchaseCreate/>}></Route>
+                  <Route path="/purchases/" element={<PurchaseList/>}></Route>
                   <Route path="/purchases/:id" element={<PurchaseDetail/>}></Route>
-                  {/*<Route path="/purchases/edit/:id" element={<PurchaseEdit/>}></Route>*/}
+                  <Route path="/purchases/edit/:id" element={<PurchaseEdit/>}></Route>
+                  <Route path="/purchases/delete/:id" element={<PurchaseDelete/>}></Route>
+                  <Route path="/purchaseItem/:id" element={<PurchaseItemDetail/>}></Route>
+
+
+                  /purchasesItem/' + item_id
+
 
               </Routes>
           </div>

@@ -10,6 +10,10 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
+import { styled } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+
 const useStyles = makeStyles((theme) => ({
 	paper: {
 		marginTop: theme.spacing(8),
@@ -39,14 +43,13 @@ export default function Create() {
 	const [formData, updateFormData] = useState(initialFormData);
 
 	useEffect(() => {
-		axiosInstance.get('admin/edit/postdetail/' + id).then((res) => {
+		axiosInstance.get('purchases/' + id).then((res) => {
 			updateFormData({
 				...formData,
 				['title']: res.data.title,
 				['description']: res.data.description,
 				['order_time']: res.data.order_time,
 			});
-			console.log(res.data);
 		});
 	}, [updateFormData]);
 
@@ -60,16 +63,14 @@ export default function Create() {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log(formData);
-
-		axiosInstance.put(`admin/edit/` + id + '/', {
+		axiosInstance.put(`purchases/` + id + '/', {
 			title: formData.title,
 			description: formData.description,
-			author: localStorage.getItem('user_id'),
+			author: 1,
 			order_time: formData.order_time,
 		});
 		navigate({
-			pathname: '/admin/',
+			pathname: '/',
 		});
 		window.location.reload();
 	};
@@ -110,7 +111,7 @@ export default function Create() {
 								value={formData.description}
 								onChange={handleChange}
 								multiline
-								rows={8}
+								minRows={8}
 							/>
 						</Grid>
 					</Grid>

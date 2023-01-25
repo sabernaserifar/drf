@@ -76,4 +76,6 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 - npm install @mui/material @mui/styled-engine-sc styled-components
 - npm install @mui/icons-material
 - npm install @material-ui/core
--  npm install @material-ui/icons 
+- npm install @material-ui/icons 
+- npm install @mui/material @emotion/react @emotion/styled
+- 
