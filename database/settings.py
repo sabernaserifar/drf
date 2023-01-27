@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
     'simple_history',
+    'generic_relations'
 ]
 
 MIDDLEWARE = [
@@ -85,10 +86,22 @@ WSGI_APPLICATION = 'database.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'epicdb',
+        'USER': 'postgres',
+        'PASSWORD': 'Pgadmin4saber',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 

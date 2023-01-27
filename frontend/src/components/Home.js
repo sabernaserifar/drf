@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
-import PurchaseList from "./purchases/PurchaseList";
+import InventoryList from "./inventories/List";
 import PostLoadingComponent from './postLoading';
 import axiosInstance from "./axios";
 
 
 const Home = () => {
-	const PostLoading = PostLoadingComponent(PurchaseList);
+	const PostLoading = PostLoadingComponent(InventoryList);
 	const [appState, setAppState] = useState({
 		loading: true,
 		posts: null,
 	});
 	// Change the purchases to the materials inventory
 	useEffect(() => {
-		axiosInstance.get(`purchases/`).then((res) => {
+		axiosInstance.get(`inventories/`).then((res) => {
 			const allPosts = res.data;
 			setAppState({ loading: false, posts: allPosts });
 			// console.log(appState.posts);
@@ -20,7 +20,7 @@ const Home = () => {
 	}, [setAppState]);
 	return (
 		<div className="home">
-			<PostLoading isLoading={appState.loading} posts={appState.posts} title="All Materials"/>
+			<PostLoading isLoading={appState.loading} posts={appState.posts} title="Inventories"/>
 		</div>
 	);
 }

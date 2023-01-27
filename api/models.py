@@ -3,13 +3,25 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
-from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from simple_history.models import HistoricalRecords
+from django.db.models import Q
 
 
-
-
+class Inventory(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    source_model = models.CharField(max_length=100)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2)
+    unit = models.CharField(max_length=50)  # pounds, lbs, gr, liter, gallo
+    timestamp = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    history = HistoricalRecords()
+    # Polymorphic relationships
+    content_type = models.ForeignKey(ContentType, related_name='inventories', on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
 
 
 class Purchase(models.Model):
@@ -21,34 +33,52 @@ class Purchase(models.Model):
     active = models.BooleanField(default=True)
     order_time = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
     delivery_time = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
+    tags = GenericRelation(Inventory)
+
 
     class Meta:
         ordering = ['updated']
 
 
-class PurchaseItem(models.Model):
-    """
-    Purchase items
-    """
-    purchase = models.ForeignKey(Purchase, related_name='purchase_items', on_delete=models.CASCADE)
-    name = models.CharField(max_length=250)
+class Order(models.Model):
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='orders', null=True, on_delete=models.SET_NULL)
+    title = models.CharField(max_length=250)
     description = models.TextField(blank=True, null=True)
-    quantity = models.CharField(max_length=50)
-    ##TODO is it better to perfrom a full_clean() validation like unit instead to avoid nonsense input?
-    # quantity_as_float = models.FloatField(blank=True, null=True)
-    ##TODO the validators are not run on .save() but when full_clean() is called.
-    unit = models.CharField(max_length=50)  # pounds, lbs, gr, liter, gallon
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    # active = models.BooleanField(default=True)
-    # external_product_id = models.CharField(max_length=250)
-    # price = models.DecimalField(max_digits=6, decimal_places=2)
-    # documentation_bucket = models.TextField()
-    # documentation_bucket_path = models.TextField()
-    # customer_name = models.CharField(max_length=250)
+    active = models.BooleanField(default=True)
+    order_time = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
+    delivery_time = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
+    tags = GenericRelation(Inventory)
 
-    def __str__(self):
-        return f'{self.id}:{self.name}:{self.quantity}:{self.unit}'
+
+    class Meta:
+        ordering = ['updated']
+
+
+# class PurchaseItem(models.Model):
+#     """
+#     Purchase items
+#     """
+#     purchase = models.ForeignKey(Purchase, related_name='purchase_items', on_delete=models.CASCADE)
+#     name = models.CharField(max_length=250)
+#     description = models.TextField(blank=True, null=True)
+#     quantity = models.CharField(max_length=50)
+#     ##TODO is it better to perfrom a full_clean() validation like unit instead to avoid nonsense input?
+#     # quantity_as_float = models.FloatField(blank=True, null=True)
+#     ##TODO the validators are not run on .save() but when full_clean() is called.
+#     unit = models.CharField(max_length=50)  # pounds, lbs, gr, liter, gallon
+#     timestamp = models.DateTimeField(auto_now_add=True)
+#     updated = models.DateTimeField(auto_now=True)
+#     # active = models.BooleanField(default=True)
+#     # external_product_id = models.CharField(max_length=250)
+#     # price = models.DecimalField(max_digits=6, decimal_places=2)
+#     # documentation_bucket = models.TextField()
+#     # documentation_bucket_path = models.TextField()
+#     # customer_name = models.CharField(max_length=250)
+#
+#     def __str__(self):
+#         return f'{self.id}:{self.name}:{self.quantity}:{self.unit}'
 
 
 class CustomAccountManager(BaseUserManager):

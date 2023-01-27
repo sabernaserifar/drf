@@ -1,24 +1,32 @@
 from django.contrib import admin
-from .models import Purchase, PurchaseItem, NewUser
+from .models import Inventory, Purchase, Order, NewUser
 from django.contrib.auth.admin import UserAdmin
+from django.contrib.contenttypes.admin import GenericTabularInline
 from django.forms import Textarea
 from django.db import models
 
+@admin.register(Inventory)
+class InventoryAdmin(admin.ModelAdmin):
+    list_display = ['id', 'title', 'quantity', 'source_model',
+                    'description', 'content_type', 'object_id', 'content_object']
+    search_fields = ['title', 'content']
 
-class PurchaseItemsInline(admin.StackedInline):
-    model = PurchaseItem
-    extra = 0
-    # readonly_fields = ['quantity_as_float', 'as_metric', 'as_imperial', 'convert_to_system']
-    #fields = ['name', 'quantity', 'unit', 'quantity_as_float']
-
+class InventoryInline(GenericTabularInline):
+    model = Inventory
 
 @admin.register(Purchase)
 class PurchaseAdmin(admin.ModelAdmin):
-    inlines = [PurchaseItemsInline]
+    inlines = [InventoryInline]
     list_display = ['title', 'updated', 'author']
     readonly_fields = ['timestamp', 'updated']
     #raw_id_fields = ['author']
 
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    inlines = [InventoryInline]
+    list_display = ['title', 'updated', 'author']
+    readonly_fields = ['timestamp', 'updated']
+    #raw_id_fields = ['author']
 
 class UserAdminConfig(UserAdmin):
     model = NewUser
