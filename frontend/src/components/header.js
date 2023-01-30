@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
 		borderBottom: `1px solid ${theme.palette.divider}`,
 	},
 	link: {
-		margin: theme.spacing(1, 1.5),
+		margin: theme.spacing(1, 0.5),
 	},
 	toolbarTitle: {
 		flexGrow: 1,
@@ -38,41 +38,21 @@ function Header() {
 						noWrap
 						className={classes.toolbarTitle}
 					>
-						<Link
-							component={NavLink}
-							to="/"
-							underline="none"
-							color="textPrimary"
-						>
-							Epic Materials
-						</Link>
 					</Typography>
-					<nav>
-						<Link
-							color="textPrimary"
-							href="#"
-							className={classes.link}
-							component={NavLink}
-							to="/purchases"
-						>
-							Purchases
-						</Link>
-					</nav>
-					<nav>
-						<Link
-							color="textPrimary"
-							href="#"
-							className={classes.link}
-							component={NavLink}
-							to="/register"
-						>
-							Register
-						</Link>
-					</nav>
 					<Button
 						href="#"
 						color="primary"
-						variant="outlined"
+						variant="contained"
+						className={classes.link}
+						component={NavLink}
+						to="/register"
+					>
+						Register
+					</Button>
+					<Button
+						href="#"
+						color="primary"
+						variant="contained"
 						className={classes.link}
 						component={NavLink}
 						to="/login"
@@ -82,7 +62,7 @@ function Header() {
 					<Button
 						href="#"
 						color="primary"
-						variant="outlined"
+						variant="contained"
 						className={classes.link}
 						component={NavLink}
 						to="/logout"

@@ -1,10 +1,9 @@
 from rest_framework import serializers
-from .models import Inventory, Purchase, Order
+from .models import Inventory, Purchase, Order, InputOrder
 
 from django.contrib.auth.models import User
 from api.models import NewUser
 from generic_relations.relations import GenericRelatedField
-
 
 
 
@@ -32,6 +31,30 @@ class InventorySerializer(serializers.ModelSerializer):
         fields = '__all__'
         # exclude = ('content_object',)
         # fields = ('title', 'content_object')
+
+
+class InputOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InputOrder
+        fields = '__all__'
+
+    def update(self, instance, validated_data):
+        inventory_instance = Inventory.objects.get(id=instance.inventory_id)
+        current_amount = instance.amount
+        if 'amount' in validated_data:
+            update_quantity = inventory_instance.quantity + current_amount - validated_data['amount']
+            if update_quantity >= 0.0:
+                print('We can do this!')
+                inventory_instance.quantity = update_quantity
+                inventory_instance.save()
+                for attr, value in validated_data.items():
+                    setattr(instance, attr, value)
+                instance.save()
+            else:
+                print('We can not do this, build the right error message!')
+                # raise Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return instance
 
 class TaggedItemSerializer(serializers.ModelSerializer):
    class Meta:
@@ -66,6 +89,7 @@ class OrderSerializer(serializers.ModelSerializer):
     # purchase_items = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     #tags = TaggedObjectRelatedField(many=True, queryset=Inventory.objects.all())
     tags = TaggedItemSerializer(many=True)
+    input_order = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     class Meta:
         model = Order
         fields = '__all__'

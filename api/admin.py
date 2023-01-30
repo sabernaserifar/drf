@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Inventory, Purchase, Order, NewUser
+from .models import Inventory, Purchase, Order, InputOrder, NewUser
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.forms import Textarea
@@ -11,8 +11,17 @@ class InventoryAdmin(admin.ModelAdmin):
                     'description', 'content_type', 'object_id', 'content_object']
     search_fields = ['title', 'content']
 
+@admin.register(InputOrder)
+class InputOrderAdmin(admin.ModelAdmin):
+    list_display = ['id', 'amount']
+
+
 class InventoryInline(GenericTabularInline):
     model = Inventory
+
+class InputOrderInline(admin.TabularInline):
+    model = InputOrder
+
 
 @admin.register(Purchase)
 class PurchaseAdmin(admin.ModelAdmin):
@@ -23,10 +32,16 @@ class PurchaseAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    inlines = [InventoryInline]
+    inlines = [InventoryInline, InputOrderInline]
     list_display = ['title', 'updated', 'author']
     readonly_fields = ['timestamp', 'updated']
     #raw_id_fields = ['author']
+
+
+
+
+
+
 
 class UserAdminConfig(UserAdmin):
     model = NewUser

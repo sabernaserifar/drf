@@ -6,7 +6,6 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseU
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from simple_history.models import HistoricalRecords
-from django.db.models import Q
 
 
 class Inventory(models.Model):
@@ -54,6 +53,12 @@ class Order(models.Model):
 
     class Meta:
         ordering = ['updated']
+
+
+class InputOrder(models.Model):
+    order = models.ForeignKey(Order, null=True, related_name='input_order', on_delete=models.CASCADE)
+    inventory = models.ForeignKey(Inventory, null=True, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
 
 
 # class PurchaseItem(models.Model):
