@@ -21,8 +21,8 @@ export const SidebarData = [
   },
 
   {
-    title: 'Experiments',
-    path: '/experiments',
+    title: 'Runs',
+    path: '/runs',
     icon: <AiIcons.AiOutlineExperiment />,
     cName: 'nav-text'
   },

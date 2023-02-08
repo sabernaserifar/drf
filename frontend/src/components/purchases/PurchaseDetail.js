@@ -80,7 +80,7 @@ const useStyles_table = makeStyles((theme) => ({
 	},
 }));
 
-export default function Create() {
+export default function PurchaseDetail() {
 	const navigate = useNavigate();
 	const { id } = useParams();
 	const initialFormData = Object.freeze({
@@ -283,7 +283,7 @@ export default function Create() {
 								<TableRow>
 									<TableCell colSpan={8} align="right">
 										<Button
-											href={'/inventories/create'}
+											href={'/inventories/create/purchase/'+ id }
 											variant="contained"
 											color="primary"
 										>

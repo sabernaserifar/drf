@@ -13,17 +13,10 @@ class PurchaseViewSet(viewsets.ModelViewSet):
     permissions_classes = [permissions.AllowAny]
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+    # def perform_create(self, serializer):
+    #     serializer.save(author=self.request.user)
 
-class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.all()
-    serializer_class = OrderSerializer
-    permissions_classes = [permissions.AllowAny]
-    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
 
 
 # Purchase Item

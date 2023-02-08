@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Inventory, Purchase, Order, InputOrder, NewUser
+from .models import *
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.forms import Textarea
@@ -7,13 +7,12 @@ from django.db import models
 
 @admin.register(Inventory)
 class InventoryAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'quantity', 'source_model',
-                    'description', 'content_type', 'object_id', 'content_object']
+    list_display = ['id', 'title', 'quantity', 'description', 'content_type', 'object_id', 'content_object']
     search_fields = ['title', 'content']
 
-@admin.register(InputOrder)
-class InputOrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'amount']
+# @admin.register(InputOrder)
+# class InputOrderAdmin(admin.ModelAdmin):
+#     list_display = ['id', 'amount']
 
 
 class InventoryInline(GenericTabularInline):
@@ -21,6 +20,10 @@ class InventoryInline(GenericTabularInline):
 
 class InputOrderInline(admin.TabularInline):
     model = InputOrder
+
+class InputRunInline(admin.TabularInline):
+    model = InputRun
+
 
 
 @admin.register(Purchase)
@@ -35,12 +38,15 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [InventoryInline, InputOrderInline]
     list_display = ['title', 'updated', 'author']
     readonly_fields = ['timestamp', 'updated']
-    #raw_id_fields = ['author']
 
 
 
 
-
+@admin.register(Run)
+class RunAdmin(admin.ModelAdmin):
+    inlines = [InventoryInline, InputRunInline]
+    list_display = ['title', 'updated', 'author']
+    readonly_fields = ['timestamp', 'updated']
 
 
 class UserAdminConfig(UserAdmin):

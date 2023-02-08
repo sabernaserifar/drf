@@ -4,8 +4,10 @@ from .models import Inventory, Purchase, Order, InputOrder
 from django.contrib.auth.models import User
 from api.models import NewUser
 from generic_relations.relations import GenericRelatedField
+from django.contrib.contenttypes.models import ContentType
 
 
+# TODO: given the size of the models, we might need to split to seperate files
 
 class InventorySerializer(serializers.ModelSerializer):
     # class Meta:
@@ -24,8 +26,12 @@ class InventorySerializer(serializers.ModelSerializer):
             queryset=Order.objects.all(),
             view_name='orders-detail',
         ),
-    })
+    }, required=False)
 
+    content_type = serializers.SlugRelatedField(
+        queryset=ContentType.objects.all(),
+        slug_field='model',
+    )
     class Meta:
         model = Inventory
         fields = '__all__'
@@ -44,15 +50,16 @@ class InputOrderSerializer(serializers.ModelSerializer):
         if 'amount' in validated_data:
             update_quantity = inventory_instance.quantity + current_amount - validated_data['amount']
             if update_quantity >= 0.0:
-                print('We can do this!')
                 inventory_instance.quantity = update_quantity
                 inventory_instance.save()
                 for attr, value in validated_data.items():
                     setattr(instance, attr, value)
                 instance.save()
             else:
-                print('We can not do this, build the right error message!')
-                # raise Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+                err_msg = {
+                    'amount': [f'A value less than {inventory_instance.quantity + current_amount} is required.']
+                }
+                raise serializers.ValidationError(err_msg)
 
         return instance
 
@@ -119,24 +126,24 @@ class OrderSerializer(serializers.ModelSerializer):
 #         fields = ['url', 'id', 'username', 'purchases']
 
 
-class CustomUserSerializer(serializers.ModelSerializer):
-    """
-    Currently unused in preference of the below.
-    """
-    email = serializers.EmailField(required=True)
-    user_name = serializers.CharField(required=True)
-    password = serializers.CharField(min_length=8, write_only=True)
-
-    class Meta:
-        model = NewUser
-        fields = ('email', 'user_name', 'password')
-        extra_kwargs = {'password': {'write_only': True}}
-
-    def create(self, validated_data):
-        password = validated_data.pop('password', None)
-        # as long as the fields are the same, we can just use this
-        instance = self.Meta.model(**validated_data)
-        if password is not None:
-            instance.set_password(password)
-        instance.save()
-        return instance
+# class CustomUserSerializer(serializers.ModelSerializer):
+#     """
+#     Currently unused in preference of the below.
+#     """
+#     email = serializers.EmailField(required=True)
+#     user_name = serializers.CharField(required=True)
+#     password = serializers.CharField(min_length=8, write_only=True)
+#
+#     class Meta:
+#         model = NewUser
+#         fields = ('email', 'user_name', 'password')
+#         extra_kwargs = {'password': {'write_only': True}}
+#
+#     def create(self, validated_data):
+#         password = validated_data.pop('password', None)
+#         # as long as the fields are the same, we can just use this
+#         instance = self.Meta.model(**validated_data)
+#         if password is not None:
+#             instance.set_password(password)
+#         instance.save()
+#         return instance

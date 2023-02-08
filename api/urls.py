@@ -9,8 +9,8 @@ from . import views
 router = SimpleRouter()
 router.register(r"purchases", views.PurchaseViewSet, basename="purchases")
 router.register(r"orders", views.OrderViewSet, basename="orders")
+router.register(r"runs", views.RunViewSet, basename="runs")
 router.register(r"inputorders", views.InputOrderViewSet, basename="inputorders")
-
 # router.register(r"purchaseItem", views.PurchaseItemViewSet, basename="purchaseItem")
 router.register(r"inventories", views.InventoryViewSet, basename="inventories")
 

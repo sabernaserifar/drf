@@ -77,7 +77,7 @@ const InventoryList = ({ posts: inventories, title}) => {
 											<TableCell align="left">{inventory.unit}</TableCell>
 											<TableCell align="left">{inventory.timestamp}</TableCell>
 											<TableCell align="left">{inventory.updated}</TableCell>
-											<TableCell align="left">{inventory.content_object.split("/")[4]}</TableCell>
+											<TableCell align="left">{inventory.content_type}</TableCell>
 
 											<TableCell align="left">
 												<Link

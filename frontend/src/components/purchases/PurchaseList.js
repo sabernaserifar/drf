@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
 const BlogList = ({ posts, title}) => {
   	// const { posts } = props;
 	const classes = useStyles();
-	if (!posts || posts.length === 0) return <p>Can not find any posts, sorry</p>;
+	// if (!posts || posts.length === 0) return <p>Can not find any posts, sorry</p>;
 
 	return (
 		<React.Fragment>
@@ -64,7 +64,7 @@ const BlogList = ({ posts, title}) => {
 								</TableRow>
 							</TableHead>
 							<TableBody>
-								{posts.map((post) => {
+								{posts && posts.length !== 0 && posts.map((post) => {
 									return (
 										<TableRow key={post.id}>
 											<TableCell component="th" scope="row">
@@ -104,11 +104,11 @@ const BlogList = ({ posts, title}) => {
 								<TableRow>
 									<TableCell colSpan={4} align="right">
 										<Button
-											href={'/purchases/'}
+											href={'/purchases/create'}
 											variant="contained"
 											color="primary"
 										>
-											New Post
+											New Purchase
 										</Button>
 									</TableCell>
 								</TableRow>

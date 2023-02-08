@@ -41,67 +41,45 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export default function Edit() {
+export default function Create() {
 	const navigate = useNavigate();
 	const { id } = useParams();
+	const {source} = useParams();
+	console.log(typeof source);
    	const classes = useStyles();
 
 	const initialFormData = Object.freeze({
 		id: '',
 		title: '',
 		description: '',
-        source_model: '',
         quantity: '',
         unit: '',
-        timestamp: '',
-		updated: '',
 		object_id: '',
 		content_type: '',
-		content_object: '',
 	});
 
 	const [formData, updateFormData] = useState(initialFormData);
 	const [errorMessage, setErrorMessage] = useState('');
 
 
-	useEffect(() => {
-		axiosInstance.get('inventories/' + id).then((res) => {
-			updateFormData({
-				...formData,
-				['title']: res.data.title,
-				['description']: res.data.description,
-                ['source_model']: res.data.source_model,
-				['quantity']: res.data.quantity,
-				['unit']: res.data.unit,
-				['timestamp']: res.data.timestamp,
-				['updated']: res.data.updated,
-				['object_id']: res.data.object_id,
-				['content_type']: res.data.content_type,
-				['content_object']: res.data.content_object,
-			});
-		});
-	}, [updateFormData]);
-
 	const handleChange = (e) => {
 		updateFormData({
 			...formData,
 			// Trimming any whitespace
-			[e.target.name]: e.target.value.trim(),
+			[e.target.name]: e.target.value,
 		});
 	};
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		axiosInstance.put(`inventories/` + id + '/', {
+		axiosInstance.post(`inventories/`, {
 			title: formData.title,
 			description: formData.description,
-			source_model: formData.source_model,
 			quantity: formData.quantity,
 			unit: formData.unit,
-			timestamp: formData.timestamp,
-			updated: formData.updated,
-			object_id: formData.object_id,
-			content_type: formData.content_type,
+			object_id: parseInt(id),
+			content_type: source,
+			source_model: source,
 			content_object: formData.content_object,
 
 		})
@@ -172,17 +150,6 @@ export default function Edit() {
 									onChange={handleChange}
 								/>
 							</Grid>
-                            <Grid item xs={12}>
-								<TextField
-									variant="outlined"
-									fullWidth
-									id="source_model"
-									label="Source Model"
-									name="source_model"
-									autoComplete="source_model"
-									value={formData.source_model}
-								/>
-							</Grid>
 							<Grid item xs={12}>
 								<TextField
 									variant="outlined"
@@ -216,7 +183,7 @@ export default function Edit() {
 							className={classes.submit}
 							onClick={handleSubmit}
 						>
-							Update Inventory
+							Add Inventory
 						</Button>
 					</form>
 				</div>

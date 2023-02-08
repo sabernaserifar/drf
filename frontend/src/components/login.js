@@ -73,8 +73,8 @@ export default function SignIn() {
 					});
 
 				navigate('/');
-				//console.log(res);
-				//console.log(res.data);
+				console.log(res);
+				console.log(res.data);
 			});
 
 	};

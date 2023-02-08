@@ -7,11 +7,9 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from simple_history.models import HistoricalRecords
 
-
 class Inventory(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
-    source_model = models.CharField(max_length=100)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
     unit = models.CharField(max_length=50)  # pounds, lbs, gr, liter, gallo
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -59,6 +57,35 @@ class InputOrder(models.Model):
     order = models.ForeignKey(Order, null=True, related_name='input_order', on_delete=models.CASCADE)
     inventory = models.ForeignKey(Inventory, null=True, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+
+class Run(models.Model):
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='runs', null=True, on_delete=models.SET_NULL)
+    title = models.CharField(max_length=250)
+    description = models.TextField(blank=True, null=True)
+    location = models.CharField(max_length=250)
+
+    start_time = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
+    end_time = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
+
+    timestamp = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    tags = GenericRelation(Inventory)
+
+
+    class Meta:
+        ordering = ['updated']
+
+
+class InputRun(models.Model):
+    run = models.ForeignKey(Run, null=True, related_name='input_run', on_delete=models.CASCADE)
+    inventory = models.ForeignKey(Inventory, null=True, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+
+
+
+
 
 
 # class PurchaseItem(models.Model):
