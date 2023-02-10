@@ -1,5 +1,5 @@
 // import {Link} from "react-router-dom";
-import React from 'react';
+import React, {useState} from 'react';
 import {makeStyles} from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Link from '@material-ui/core/Link';
@@ -13,6 +13,8 @@ import TableRow from '@material-ui/core/TableRow';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import EditIcon from '@material-ui/icons/Edit';
 import Button from '@material-ui/core/Button';
+import { Pagination } from "@material-ui/lab";
+import usePagination from "../Pagination";
 
 //TODO: move style sheets single file
 const useStyles = makeStyles((theme) => ({
@@ -47,7 +49,20 @@ const useStyles = makeStyles((theme) => ({
 const InventoryList = ({ posts: inventories, title}) => {
   	// const { posts } = props;
 	const classes = useStyles();
+
+	let [page, setPage] = useState(1);
+	const PER_PAGE = 15;
+  
+	const count = Math.ceil(inventories.length / PER_PAGE);
+	const _DATA = usePagination(inventories, PER_PAGE);
+  
+	const handleChange = (e, p) => {
+	  setPage(p);
+	  _DATA.jump(p);
+	};
+
 	if (!inventories || inventories.length === 0) return <p>Can not find any inventories, sorry</p>;
+
 
 	return (
 		<React.Fragment>
@@ -68,7 +83,7 @@ const InventoryList = ({ posts: inventories, title}) => {
 								</TableRow>
 							</TableHead>
 							<TableBody>
-								{inventories.map((inventory) => {
+								{_DATA.currentData().map((inventory) => {
 									return (
 										<TableRow key={inventory.id}>
 											<TableCell component="th" scope="row">{inventory.id}</TableCell>
@@ -95,6 +110,14 @@ const InventoryList = ({ posts: inventories, title}) => {
 							</TableBody>
 						</Table>
 					</TableContainer>
+					<Pagination
+						count={count}
+						size="large"
+						page={page}
+						variant="outlined"
+						shape="rounded"
+						onChange={handleChange}
+					/>
 				</Paper>
 			</Container>
 		</React.Fragment>

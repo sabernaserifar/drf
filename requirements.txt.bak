@@ -1,0 +1,7 @@
+django
+djangorestframework
+django-cors-headers
+djangorestframework-simplejwt
+drf_yasg
+django-simple-history
+psycopg2

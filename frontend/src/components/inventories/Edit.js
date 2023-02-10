@@ -95,7 +95,6 @@ export default function Edit() {
 		axiosInstance.put(`inventories/` + id + '/', {
 			title: formData.title,
 			description: formData.description,
-			source_model: formData.source_model,
 			quantity: formData.quantity,
 			unit: formData.unit,
 			timestamp: formData.timestamp,
@@ -170,17 +169,6 @@ export default function Edit() {
 									multiline
 									minRows={8}
 									onChange={handleChange}
-								/>
-							</Grid>
-                            <Grid item xs={12}>
-								<TextField
-									variant="outlined"
-									fullWidth
-									id="source_model"
-									label="Source Model"
-									name="source_model"
-									autoComplete="source_model"
-									value={formData.source_model}
 								/>
 							</Grid>
 							<Grid item xs={12}>

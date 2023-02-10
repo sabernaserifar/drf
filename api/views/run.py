@@ -1,8 +1,8 @@
 from rest_framework import permissions
 from rest_framework import viewsets
 
-from api.models import Run
-from api.serializers import RunSerializer
+from api.models import Run, InputRun
+from api.serializers import RunSerializer, InputRunSerializer
 
 
 class RunViewSet(viewsets.ModelViewSet):
@@ -14,8 +14,9 @@ class RunViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def perform_update(self, serializer):
-        print(self.request)
-        print("================")
-        print(self.request.data)
-        serializer.save()
+
+class InputRunViewSet(viewsets.ModelViewSet):
+    queryset = InputRun.objects.all()
+    serializer_class = InputRunSerializer
+    permissions_classes = [permissions.AllowAny]
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]

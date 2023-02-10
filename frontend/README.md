@@ -70,13 +70,22 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
 ##
+
+## TODO and cleanupds:
+
+- Move all style sheets to a separate file
+- Include a ComponentHeader.js in components for DRY
+
+## Packages to Install
+
 - npm install react-router-dom
 - npm install axios
 
 - npm install @mui/material @mui/styled-engine-sc styled-components
 - npm install @mui/icons-material
 - npm install @material-ui/core
-- npm install @material-ui/icons 
+- npm install @material-ui/lab
+- npm install @material-ui/icons
 - npm install @mui/material @emotion/react @emotion/styled
 - npm install react-icons --save
 - npm install @mui/x-date-pickers

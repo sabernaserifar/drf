@@ -79,7 +79,7 @@ class Run(models.Model):
 
 class InputRun(models.Model):
     run = models.ForeignKey(Run, null=True, related_name='input_run', on_delete=models.CASCADE)
-    inventory = models.ForeignKey(Inventory, null=True, on_delete=models.CASCADE)
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
 

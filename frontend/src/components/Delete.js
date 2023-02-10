@@ -1,4 +1,4 @@
-import axiosInstance from '../axios';
+import axiosInstance from './axios';
 import { useNavigate, useParams } from 'react-router-dom';
 //MaterialUI
 import Container from '@material-ui/core/Container';
@@ -7,12 +7,12 @@ import Box from '@material-ui/core/Box';
 
 export default function Delete() {
 	const navigate = useNavigate();
-	const { id } = useParams();
+	const { id, content_type } = useParams();
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		axiosInstance
-			.delete('purchases/' + id + '/')
+			.delete( `${content_type}/${id}/`)
 			.catch(function (error) {
 				if (error.response) {
 					console.log(error.response.data);
@@ -22,7 +22,7 @@ export default function Delete() {
 			})
 			.then(function () {
 					navigate({
-						pathname: '/',
+						pathname: `/${content_type}`,
 					});
 					window.location.reload();
 			});

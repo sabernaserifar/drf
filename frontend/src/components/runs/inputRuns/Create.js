@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import axiosInstance from '../axios';
+import axiosInstance from '../../axios';
 import {useNavigate, useParams} from 'react-router-dom';
 //MaterialUI
 import Button from '@material-ui/core/Button';
@@ -44,47 +44,35 @@ const useStyles = makeStyles((theme) => ({
 export default function Create() {
 	const navigate = useNavigate();
 	const { id } = useParams();
-	const {source} = useParams();
-   	const classes = useStyles();
+	const classes = useStyles();
 
 	const initialFormData = Object.freeze({
 		id: '',
-		title: '',
-		description: '',
-        quantity: '',
-        unit: '',
-		object_id: '',
-		content_type: '',
+		run: '',
+		inventory: '',
+		amount: '',
 	});
 
 	const [formData, updateFormData] = useState(initialFormData);
 	const [errorMessage, setErrorMessage] = useState('');
 
-
 	const handleChange = (e) => {
 		updateFormData({
 			...formData,
-			// Trimming any whitespace
 			[e.target.name]: e.target.value,
 		});
 	};
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		axiosInstance.post(`inventories/`, {
-			title: formData.title,
-			description: formData.description,
-			quantity: formData.quantity,
-			unit: formData.unit,
-			object_id: parseInt(id),
-			content_type: source,
-			source_model: source,
-			content_object: formData.content_object,
-
+		axiosInstance.post(`inputruns/`, {
+			run: id,
+			inventory: formData.inventory,
+			amount: formData.amount,
 		})
 		.then((response) => {
 			navigate({
-			pathname: '/',
+			pathname: '/runs/' + id,
 		});
 		window.location.reload();
 
@@ -125,11 +113,11 @@ export default function Create() {
 									variant="outlined"
 									required
 									fullWidth
-									id="title"
-									label="Title"
-									name="title"
-									autoComplete="title"
-									value={formData.title}
+									id="inventory"
+									label="Inventory"
+									name="inventory"
+									autoComplete="inventory"
+									value={formData.inventory}
 									onChange={handleChange}
 								/>
 							</Grid>
@@ -137,37 +125,11 @@ export default function Create() {
 								<TextField
 									variant="outlined"
 									fullWidth
-									id="description"
-									label="Description"
-									name="description"
-									autoComplete="description"
-									value={formData.description}
-									multiline
-									minRows={8}
-									onChange={handleChange}
-								/>
-							</Grid>
-							<Grid item xs={12}>
-								<TextField
-									variant="outlined"
-									fullWidth
-									id="quantity"
-									label="Quantity"
-									name="quantity"
-									autoComplete="quantity"
-									value={formData.quantity}
-									onChange={handleChange}
-								/>
-							</Grid>
-							<Grid item xs={12}>
-								<TextField
-									variant="outlined"
-									fullWidth
-									id="unit"
-									label="Unit"
-									name="unit"
-									autoComplete="unit"
-									value={formData.unit}
+									id="amount"
+									label="Amount"
+									name="amount"
+									autoComplete="amount"
+									value={formData.amount}
 									onChange={handleChange}
 								/>
 							</Grid>
@@ -180,7 +142,7 @@ export default function Create() {
 							className={classes.submit}
 							onClick={handleSubmit}
 						>
-							Add Inventory
+							Add Input
 						</Button>
 					</form>
 				</div>
