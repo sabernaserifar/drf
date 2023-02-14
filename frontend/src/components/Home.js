@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import InventoryList from "./inventories/List";
+import InventoryList from "./inventories/InventoryList";
 import PostLoadingComponent from './postLoading';
 import axiosInstance from "./axios";
 

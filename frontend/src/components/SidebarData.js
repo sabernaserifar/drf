@@ -8,8 +8,8 @@ import * as MdIcons from "react-icons/md";
 
 export const SidebarData = [
   {
-    title: 'Home',
-    path: '/',
+    title: 'Inventory',
+    path: '/inventories',
     icon: <AiIcons.AiFillHome />,
     cName: 'nav-text'
   },
