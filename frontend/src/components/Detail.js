@@ -87,7 +87,7 @@ export default function Detail(content_type, fields, required_fields, input_inve
 				<CssBaseline />
 				<div className={classes.paper}>
 				<Typography component="h1" variant="h5">
-					Create New Run
+					{sanitizer(content_type)} {id} Details 
 				</Typography>
 				<form className={classes.form} noValidate>
 					<Grid container spacing={2}>

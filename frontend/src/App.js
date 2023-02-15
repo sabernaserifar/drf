@@ -10,10 +10,6 @@ import PurchaseEdit from "./components/purchases/PurchasesEdit";
 
 import * as Run from "./components/runs/RunCRUD";
 
-import RunDetail from "./components/Detail";
-import RunEdit from "./components/runs/RunEdit";
-
-
 
 import InventoryList from "./components/inventories/InventoryList";
 import InventoryDetail from "./components/inventories/Detail";
@@ -63,11 +59,10 @@ function App() {
                   <Route exact path="/purchases/edit/:id" element={<PurchaseEdit/>}></Route>
 
                   <Route exact path="/runs/" element={<Run.List/>}></Route>
-                  {/* <Route exact path="/runs/create" element={<RunCreate/>}></Route> */}
                   <Route exact path="/runs/create/" element={<Run.Create/>}></Route>
-
                   <Route exact path="/runs/:id" element={<Run.Detail/>}></Route>
-                  <Route exact path="/runs/edit/:id" element={<RunEdit/>}></Route>
+                  <Route exact path="/runs/edit/:id" element={<Run.Edit/>}></Route>
+
                   <Route exact path="/input_runs/edit/:id/run/:runId" element={<InputRunEdit/>}></Route>
                   <Route exact path="/input_runs/delete/:id/run/:runId" element={<InputRunDelete/>}></Route>
                   <Route exact path="/input_runs/create/:source/:id" element={<InputRunCreate/>}></Route>

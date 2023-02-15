@@ -4,6 +4,8 @@ import {useNavigate} from 'react-router-dom';
 import { redirect } from "react-router-dom";
 import * as Constants from "./DefaultParams";
 import useStyles from "./FormStyle";
+import sanitizer from './sanitizer';
+
 
 
 //MaterialUI
@@ -139,7 +141,7 @@ export default function Create(content_type, fields, required_fields) {
 			<CssBaseline />
 			<div className={classes.paper}>
 				<Typography component="h1" variant="h5">
-					Create New Run
+					Create New {sanitizer(content_type)}
 				</Typography>
 				<form className={classes.form} noValidate>
 					<Grid container spacing={2}>
