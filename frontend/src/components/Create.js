@@ -65,9 +65,9 @@ export default function Create(content_type, fields, required_fields) {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		axiosInstance.post(`${content_type}/`, formData)
+		axiosInstance.post(`/${content_type}/`, formData)
 		.then((response) => {
-			navigate({ pathname: `${content_type}/`});
+			navigate({ pathname: `/${content_type}/`});
 			window.location.reload();
 		})
 		.catch((error) => {
@@ -158,8 +158,7 @@ export default function Create(content_type, fields, required_fields) {
 							</Select>
 						</Grid>}
 						{fields && fields.map((field, i) => {
-							console.log(field, required_fields[i]);
-								return create_form(field, required_fields[i]);
+							return create_form(field, required_fields[i]);
 						})}
 					</Grid>
 					<Button

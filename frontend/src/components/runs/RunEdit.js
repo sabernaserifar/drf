@@ -86,7 +86,7 @@ export default function RunEdit() {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		axiosInstance.put(`runs/` + id + '/', {
+		axiosInstance.put(`/runs/` + id + '/', {
 			title: formData.title,
 			description: formData.description,
 			location: formData.location,

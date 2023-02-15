@@ -1,5 +1,7 @@
 // import {Link} from "react-router-dom";
 import React , {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+
 import {makeStyles} from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Link from '@material-ui/core/Link';
@@ -48,6 +50,8 @@ const useStyles = makeStyles((theme) => ({
 
 const ItemsList = ({ posts, columns, content_type}) => {
 	const classes = useStyles();
+	const navigate = useNavigate();
+
 	let [page, setPage] = useState(1);
 
 	const PER_PAGE = 15;
@@ -76,7 +80,12 @@ const ItemsList = ({ posts, columns, content_type}) => {
 							<TableBody>
 								{posts && posts.length !== 0 && _DATA.currentData().map((post) => {
 									return (
-										<TableRow key={post.id}>
+										<TableRow 
+											hover  
+											selected={false}
+											key={post.id} 
+											onClick={() => navigate({pathname: `/${content_type}/${post.id}`})}
+											>
 											{columns && columns.map((column, i) => {
 												if (column == 'content_object') {
 													return (<TableCell align="left" key={'content_obj'+i}>
@@ -102,14 +111,14 @@ const ItemsList = ({ posts, columns, content_type}) => {
 											<TableCell align="left">
 												<Link
 													color="textPrimary"
-													href={`${content_type}/edit/${post.id}/`}
+													href={`/${content_type}/edit/${post.id}/`}
 													className={classes.link}
 												>
 													<EditIcon></EditIcon>
 												</Link>
 												<Link
 													color="textPrimary"
-													href={`${content_type}/delete/${post.id}/`}
+													href={`/${content_type}/delete/${post.id}/`}
 													className={classes.link}
 												>
 													<DeleteForeverIcon></DeleteForeverIcon>
