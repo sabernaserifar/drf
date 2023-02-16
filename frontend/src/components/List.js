@@ -1,6 +1,8 @@
 // import {Link} from "react-router-dom";
 import React , {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
+import useStyles from "./FormStyle";
+
 
 import {makeStyles} from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
@@ -18,34 +20,6 @@ import Button from '@material-ui/core/Button';
 import { Pagination } from "@material-ui/lab";
 import usePagination from "./Pagination";
 import sanitizer from './sanitizer';
-
-//TODO: move style sheets single file
-const useStyles = makeStyles((theme) => ({
-	cardMedia: {
-		paddingTop: '56.25%', // 16:9
-	},
-	link: {
-		margin: theme.spacing(1, 1.5),
-	},
-	cardHeader: {
-		backgroundColor:
-			theme.palette.type === 'light'
-				? theme.palette.grey[200]
-				: theme.palette.grey[700],
-	},
-	postTitle: {
-		fontSize: '16px',
-		textAlign: 'left',
-	},
-	postText: {
-		display: 'flex',
-		justifyContent: 'left',
-		alignItems: 'baseline',
-		fontSize: '12px',
-		textAlign: 'left',
-		marginBottom: theme.spacing(2),
-	},
-}));
 
 
 const ItemsList = ({ posts, columns, content_type}) => {
@@ -85,7 +59,7 @@ const ItemsList = ({ posts, columns, content_type}) => {
 											selected={false}
 											key={post.id} 
 											onClick={() => navigate({pathname: `/${content_type}/${post.id}`})}
-											>
+										>
 											{columns && columns.map((column, i) => {
 												if (column == 'content_object') {
 													return (<TableCell align="left" key={'content_obj'+i}>

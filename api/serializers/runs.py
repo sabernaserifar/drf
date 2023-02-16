@@ -82,7 +82,7 @@ class InputRunSerializer(serializers.ModelSerializer):
 class RunSerializer(serializers.ModelSerializer):
     tags = TaggedInventorySerializer(many=True, required=False)
     # input_run = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    input_run = InputRunSerializer(many=True, read_only=True)
+    input_runs = InputRunSerializer(many=True, read_only=True)
 
     class Meta:
         model = Run

@@ -69,7 +69,7 @@ export default function Detail() {
 				['updated']: res.data.updated,
 			});
 		});
-	}, [updateFormData, formData, id]);
+	}, [updateFormData]);
 
 	return (
 		<React.Fragment>

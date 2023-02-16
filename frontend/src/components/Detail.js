@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from './axios';
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
 import useStyles from "./FormStyle";
 import * as Constants from "./DefaultParams";
 import sanitizer from "./sanitizer";
@@ -28,6 +30,8 @@ import Paper from '@mui/material/Paper';
 export default function Detail(content_type, fields, required_fields, input_inventory, output_inventory) {
 	// style classes
 	const classes = useStyles();
+	const navigate = useNavigate();
+
 
 	// Collect params
 	const { id } = useParams();
@@ -107,7 +111,7 @@ export default function Detail(content_type, fields, required_fields, input_inve
 				</form>
 			</div>
 			</Container>
-			{ inputInventory && inputInventory.length !== 0 && <Container maxWidth="md" component="main" style={{paddingTop: "50px"}}>
+			{ input_inventory && <Container maxWidth="md" component="main" style={{paddingTop: "50px"}}>
 				<Typography component="h1" variant="h5">
 					Input Items
 				</Typography>
@@ -124,7 +128,7 @@ export default function Detail(content_type, fields, required_fields, input_inve
 								</TableRow>
 							</TableHead>
 							<TableBody>
-								{inputInventory.map((item) => {
+								{inputInventory && inputInventory.map((item) => {
 									return (
 										<TableRow key={item.id}>
 											<TableCell component="th" scope="row">
@@ -162,14 +166,14 @@ export default function Detail(content_type, fields, required_fields, input_inve
 											<TableCell align="left">
 												<Link
 													color="textPrimary"
-													href={'/input_runs/edit/' + item.id + '/run/' + id}
+													href={`/${input_inventory}/edit/${item.id}/${content_type}/${id}`}
 													className={classes.link}
 												>
 													<EditIcon></EditIcon>
 												</Link>
 												<Link
 													color="textPrimary"
-													href={'/input_runs/delete/' + item.id + '/run/' + id}
+													href={`/${input_inventory}/delete/${item.id}`}
 													className={classes.link}
 												>
 													<DeleteForeverIcon></DeleteForeverIcon>
@@ -181,7 +185,7 @@ export default function Detail(content_type, fields, required_fields, input_inve
 								<TableRow>
 									<TableCell colSpan={5} align="right">
 										<Button
-											href={'/input_runs/create/run/'+ id }
+											href={`/${input_inventory}/create/${content_type}/${id}`}
 											variant="contained"
 											color="primary"
 										>
@@ -194,6 +198,7 @@ export default function Detail(content_type, fields, required_fields, input_inve
 					</TableContainer>
 				</Paper>
 			</Container>}
+			
 			{ outputInventory && outputInventory.length !== 0 && <Container maxWidth="md" component="main" style={{paddingTop: "50px"}}>
 				<Typography component="h1" variant="h5">
 					Output Items
@@ -215,7 +220,12 @@ export default function Detail(content_type, fields, required_fields, input_inve
 							<TableBody>
 								{outputInventory.map((item) => {
 									return (
-										<TableRow key={item.id}>
+										<TableRow 
+											hover  
+											selected={false}
+											key={item.id} 
+											onClick={() => navigate({pathname: `/inventories/${item.id}`})}
+										>
 											<TableCell component="th" scope="row">
 												<Link
 													color="textPrimary"
@@ -256,7 +266,7 @@ export default function Detail(content_type, fields, required_fields, input_inve
 								<TableRow>
 									<TableCell colSpan={7} align="right">
 										<Button
-											href={'/inventories/create/run/'+ id }
+											href={`/inventories/create/${content_type}/${id}`}
 											variant="contained"
 											color="primary"
 										>
@@ -272,3 +282,5 @@ export default function Detail(content_type, fields, required_fields, input_inve
 		</React.Fragment>
 	);
 }
+
+

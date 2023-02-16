@@ -12,7 +12,6 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
@@ -24,9 +23,6 @@ import moment from 'moment-timezone';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
-import { styled } from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
 
 
 export default function Edit(content_type, fields, required_fields) {
@@ -145,7 +141,7 @@ export default function Edit(content_type, fields, required_fields) {
 						name={field}
 						value={formData[field]}
 						autoComplete={field}
-						onChange={handleChange}
+						onChange={1>2? handleChange:null }
 						multiline={multiRows}
 						minRows={8}
 					/>

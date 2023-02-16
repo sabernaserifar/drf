@@ -9,6 +9,7 @@ import PurchaseDetail from "./components/purchases/PurchaseDetail";
 import PurchaseEdit from "./components/purchases/PurchasesEdit";
 
 import * as Run from "./components/runs/RunCRUD";
+import * as InputRun from "./components/runs/InputRunCRUD";
 
 
 import InventoryList from "./components/inventories/InventoryList";
@@ -63,9 +64,10 @@ function App() {
                   <Route exact path="/runs/:id" element={<Run.Detail/>}></Route>
                   <Route exact path="/runs/edit/:id" element={<Run.Edit/>}></Route>
 
-                  <Route exact path="/input_runs/edit/:id/run/:runId" element={<InputRunEdit/>}></Route>
-                  <Route exact path="/input_runs/delete/:id/run/:runId" element={<InputRunDelete/>}></Route>
-                  <Route exact path="/input_runs/create/:source/:id" element={<InputRunCreate/>}></Route>
+                  <Route exact path="/input_runs/edit/:id/runs/:runId" element={<InputRun.Edit/>}></Route>
+                  <Route exact path="/input_runs/:id" element={<InputRun.List/>}></Route>
+                  
+                  <Route exact path="/input_runs/create/runs/:parentID" element={<InputRun.Create/>}></Route>
                   
 
 

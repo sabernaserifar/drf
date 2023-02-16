@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import axiosInstance from './axios';
-import {useNavigate} from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import { redirect } from "react-router-dom";
 import * as Constants from "./DefaultParams";
 import useStyles from "./FormStyle";
@@ -27,20 +27,22 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 
 
-export default function Create(content_type, fields, required_fields) {
+export default function Create(content_type, fields) {
+		
 	const navigate = useNavigate();
 	const classes = useStyles();
 	let time_zone = false;
 	
 	let form_dict = {};
-	fields.map(field =>{
+	fields.forEach((value, field) => {
 		if (field.includes(Constants.TIMESTRIN)) {
 			form_dict[field] = dayjs();
-			time_zone = true;
+			time_zone = true;	
 		}else{
-			form_dict[field] = '';
+			form_dict[field] = value.fixed_value;
 		}
-	}); 
+	});
+
 
 	const initialFormData = Object.freeze(form_dict);
 	const [formData, updateFormData] = useState(initialFormData);
@@ -69,7 +71,8 @@ export default function Create(content_type, fields, required_fields) {
 		e.preventDefault();
 		axiosInstance.post(`/${content_type}/`, formData)
 		.then((response) => {
-			navigate({ pathname: `/${content_type}/`});
+			// navigate({ pathname: `/${content_type}/`});
+			navigate({ pathname: `/runs/`});
 			window.location.reload();
 		})
 		.catch((error) => {
@@ -92,24 +95,29 @@ export default function Create(content_type, fields, required_fields) {
 		});
 	};
 
-	const create_form = (field, required) =>{
+	const create_form = (field) =>{
+		
+		const label = field[0];
+		const required = field[1].required_view;
+		const changable = field[1].fixed_value ? false : true;
+		
 		let multiRows = false;
 		Constants.MULTIROWS.map( name => {
-			if (field.includes(name)){
+			if (label.includes(name)){
 				multiRows = true; 
 			};
 		});
 	
-		if (field.includes(Constants.TIMESTRIN)){		
+		if (label.includes(Constants.TIMESTRIN)){
 			return (
-				<Grid item xs={12} key={field}>
+				<Grid item xs={12} key={label}>
 				<LocalizationProvider dateAdapter={AdapterDayjs}>
 				<Stack spacing={3}>
 					<DateTimePicker
 					required={required}
-					label={field}
-					value={formData[field]}
-					onChange={(e)=>handleChange(e, field)}
+					label={label}
+					value={formData[label]}
+					onChange={changable? (e)=>handleChange(e, label):null}
 					renderInput={(params) => <TextField {...params} />}
 					/>
 				</Stack>
@@ -118,16 +126,17 @@ export default function Create(content_type, fields, required_fields) {
 			);
 		}else{
 			return (
-				<Grid item xs={12} key={field}>
+				<Grid item xs={12} key={label}>
 					<TextField
 						variant="outlined"
 						required={required}
 						fullWidth
-						id={field}
-						label={field}
-						name={field}
-						autoComplete={field}
-						onChange={handleChange}
+						id={label}
+						label={label}
+						name={label}
+						value={formData[label]}
+						autoComplete={label}
+						onChange={changable? handleChange:null}
 						multiline={multiRows}
 						minRows={8}
 					/>
@@ -159,8 +168,10 @@ export default function Create(content_type, fields, required_fields) {
 								<MenuItem value={'EST'}>EST</MenuItem>
 							</Select>
 						</Grid>}
-						{fields && fields.map((field, i) => {
-							return create_form(field, required_fields[i]);
+
+						
+						{fields && Array.from(fields).map((field) => {
+							return create_form(field);
 						})}
 					</Grid>
 					<Button
