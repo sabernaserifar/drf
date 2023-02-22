@@ -4,10 +4,7 @@ import {useNavigate, useParams} from 'react-router-dom';
 import { redirect } from "react-router-dom";
 import * as Constants from "./DefaultParams";
 import useStyles from "./FormStyle";
-import sanitizer from './sanitizer';
-
-
-
+import * as utils from './utils';
 //MaterialUI
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -17,18 +14,19 @@ import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
-
 import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import Stack from '@mui/material/Stack';
-import moment from 'moment-timezone';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 
 
-export default function Create(content_type, fields) {
-		
+export default function Create(fields) {
+	console.log('In create ', axiosInstance);
+
+	const base_route = window.location.pathname.split("/")[1];
+	const { parent, parentID } = useParams(); // for navigation after create 
 	const navigate = useNavigate();
 	const classes = useStyles();
 	let time_zone = false;
@@ -40,24 +38,20 @@ export default function Create(content_type, fields) {
 			time_zone = true;	
 		}else{
 			form_dict[field] = value.fixed_value;
-		}
+		};
 	});
-
-
 	const initialFormData = Object.freeze(form_dict);
+
+	// Define States
 	const [formData, updateFormData] = useState(initialFormData);
 	const [timezone, setTimezone] = React.useState('US/Pacific');
 	const [errorMessage, setErrorMessage] = useState('');
-
-	const convert_tz = (time_object) => {
-		return moment.tz(time_object.format('YYYY-MM-DDTHH:mm'), timezone).format();
-	};
 
 	const handleChange = (e, myField) => {
 		if (myField && myField.includes(Constants.TIMESTRIN)){
 			updateFormData({
 				...formData,
-				[myField]: convert_tz(e),
+				[myField]: utils.convert_tz(e, timezone),
 			});
 		}else{
 			updateFormData({
@@ -69,10 +63,14 @@ export default function Create(content_type, fields) {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		axiosInstance.post(`/${content_type}/`, formData)
+		console.log('In create ',axiosInstance);
+		axiosInstance.post(`/${base_route}/`, formData)
 		.then((response) => {
-			// navigate({ pathname: `/${content_type}/`});
-			navigate({ pathname: `/runs/`});
+			if (parent && parentID){
+				navigate({ pathname: `/${parent}/${parentID}/`}); 
+			}else{
+				navigate({ pathname: `/${base_route}/`}); 
+			};
 			window.location.reload();
 		})
 		.catch((error) => {
@@ -95,33 +93,25 @@ export default function Create(content_type, fields) {
 		});
 	};
 
-	const create_form = (field) =>{
-		
+	const build_block = (field) =>{
 		const label = field[0];
 		const required = field[1].required_view;
 		const changable = field[1].fixed_value ? false : true;
-		
-		let multiRows = false;
-		Constants.MULTIROWS.map( name => {
-			if (label.includes(name)){
-				multiRows = true; 
-			};
-		});
-	
 		if (label.includes(Constants.TIMESTRIN)){
 			return (
 				<Grid item xs={12} key={label}>
-				<LocalizationProvider dateAdapter={AdapterDayjs}>
-				<Stack spacing={3}>
-					<DateTimePicker
-					required={required}
-					label={label}
-					value={formData[label]}
-					onChange={changable? (e)=>handleChange(e, label):null}
-					renderInput={(params) => <TextField {...params} />}
-					/>
-				</Stack>
-				</LocalizationProvider>
+					<LocalizationProvider dateAdapter={AdapterDayjs}>
+						<Stack spacing={13}>
+							<DateTimePicker
+							label={label}
+							value={formData[label]}
+							onChange={changable? (e)=>handleChange(e, label):null}
+							renderInput={
+								(params) => <TextField variant="outlined" required={required} {...params} />
+							}
+							/>
+						</Stack>
+					</LocalizationProvider>
 				</Grid>
 			);
 		}else{
@@ -137,7 +127,7 @@ export default function Create(content_type, fields) {
 						value={formData[label]}
 						autoComplete={label}
 						onChange={changable? handleChange:null}
-						multiline={multiRows}
+						multiline={utils.multiRowsField(label)}
 						minRows={8}
 					/>
 				</Grid>
@@ -150,29 +140,30 @@ export default function Create(content_type, fields) {
 			<CssBaseline />
 			<div className={classes.paper}>
 				<Typography component="h1" variant="h5">
-					Create New {sanitizer(content_type)}
+					Create New {utils.sanitizer(base_route)}
 				</Typography>
 				<form className={classes.form} noValidate>
 					<Grid container spacing={2}>
 						{ time_zone && 
-						<Grid item xs={12} key={'timezone'}>
-							<InputLabel id="demo-simple-select-label">Time Zone</InputLabel>
-							<Select
-								labelId="demo-simple-select-label"
-								id="demo-simple-select"
-								value={timezone}
-								label="Timezone"
-								onChange={(e)=>{setTimezone(e.target.value)}}
-							>
-								<MenuItem value={'US/Pacific'}>US/Pacific</MenuItem>
-								<MenuItem value={'EST'}>EST</MenuItem>
-							</Select>
-						</Grid>}
-
-						
-						{fields && Array.from(fields).map((field) => {
-							return create_form(field);
-						})}
+							<Grid item xs={12} key={'timezone'}>
+								<InputLabel id="demo-simple-select-label">Time Zone</InputLabel>
+								<Select
+									labelId="demo-simple-select-label"
+									id="demo-simple-select"
+									value={timezone}
+									label="Timezone"
+									onChange={(e)=>{setTimezone(e.target.value)}}
+								>
+									<MenuItem value={'US/Pacific'}>US/Pacific</MenuItem>
+									<MenuItem value={'EST'}>EST</MenuItem>
+								</Select>
+							</Grid>
+						}
+						{ fields && 
+							Array.from(fields).map((field) => {
+								return build_block(field);
+							})
+						}
 					</Grid>
 					<Button
 						type="submit"
@@ -182,7 +173,7 @@ export default function Create(content_type, fields) {
 						className={classes.submit}
 						onClick={handleSubmit}
 					>
-						Create {content_type}
+						Create {base_route}
 					</Button>
 				</form>
 			</div>

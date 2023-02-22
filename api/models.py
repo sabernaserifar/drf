@@ -6,10 +6,11 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseU
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from simple_history.models import HistoricalRecords
+from datetime import datetime
 
 class Inventory(models.Model):
     title = models.CharField(max_length=100)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
     unit = models.CharField(max_length=50)  # pounds, lbs, gr, liter, gallo
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -64,29 +65,51 @@ class Run(models.Model):
     title = models.CharField(max_length=250)
     description = models.TextField(blank=True, null=True)
     location = models.CharField(max_length=250)
-
     start_time = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
     end_time = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
-
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     tags = GenericRelation(Inventory)
-
 
     class Meta:
         ordering = ['updated']
 
 
 class InputRun(models.Model):
-    run = models.ForeignKey(Run, null=True, related_name='input_runs', on_delete=models.CASCADE)
+    run = models.ForeignKey(Run, related_name='input_runs', on_delete=models.CASCADE)
     inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
 
 
+class Sensor(models.Model):
+    name = models.CharField(max_length=50)
 
 
+class SensorReading(models.Model):
+    time = models.DateTimeField(primary_key=True, default=datetime.now)
+    value = models.DecimalField(max_digits=10, decimal_places=4)
+    sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
 
+    class Meta:
+        managed = False
+        db_table = 'api_sensorreading'
+        unique_together = ['sensor', 'time']
+
+# migrations.RunSQL(
+#             sql=[(
+#                 "CREATE TABLE public.api_sensorreading (\
+#                     value decimal NOT NULL, \
+#                     time timestamp NOT NULL,\
+#                     device_id int4 NOT NULL,\
+#                     CONSTRAINT api_sensorreading_pkey PRIMARY KEY (time, device_id)\
+#                 );\
+#                 SELECT create_hypertable('api_sensorreading', 'time');"
+#             )],
+#             reverse_sql=[(
+#                  "DROP TABLE public.api_sensorreading;"
+#             )]
+#         )
 
 # class PurchaseItem(models.Model):
 #     """

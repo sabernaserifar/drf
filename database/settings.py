@@ -97,7 +97,7 @@ WSGI_APPLICATION = 'database.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'epicdb',
+        'NAME': 'example2',
         'USER': 'postgres',
         'PASSWORD': 'Pgadmin4saber',
         'HOST': 'localhost',

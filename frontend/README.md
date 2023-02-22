@@ -90,3 +90,4 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 - npm install react-icons --save
 - npm install @mui/x-date-pickers
 - npm install dayjs --save
+- npm install devextreme@22.2 devextreme-react@22.2 --save --save-exact

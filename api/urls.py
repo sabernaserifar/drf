@@ -21,8 +21,8 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     # path('inventories/', views.InventoryViewSet.as_view(), name='inventories-list'),
-
     path('', include(router.urls)),
+    path('sensors/', views.RegisterData.as_view(), name='sensors'),
 
     # path('purchases/', views.PurchaseList.as_view(), name='purchase-list'),
     # path('purchases/<int:pk>/', views.PurchaseDetail.as_view(), name='purchase-detail'),

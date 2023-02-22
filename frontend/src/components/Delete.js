@@ -6,13 +6,15 @@ import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 
 export default function Delete() {
+	const base_route = window.location.pathname.split("/")[1];
+	const { id, parent, parentID } = useParams(); // for navigation after create 
 	const navigate = useNavigate();
-	const { id, content_type } = useParams();
+	
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		axiosInstance
-			.delete( `${content_type}/${id}/`)
+			.delete(`${base_route}/${id}/`)
 			.catch(function (error) {
 				if (error.response) {
 					console.log(error.response.data);
@@ -21,10 +23,12 @@ export default function Delete() {
 				}
 			})
 			.then(function () {
-					navigate({
-						pathname: `/${content_type}`,
-					});
-					window.location.reload();
+				if (parent && parentID){
+					navigate({ pathname: `/${parent}/${parentID}/`}); 
+				}else{
+					navigate({ pathname: `/${base_route}/`});
+				};
+				window.location.reload();
 			});
 	};
 

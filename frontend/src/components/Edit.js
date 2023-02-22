@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import useStyles from './FormStyle';
 import * as Constants from "./DefaultParams";
 import sanitizer from './sanitizer';
+import * as utils from './utils';
 
 
 //MaterialUI
@@ -25,36 +26,33 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 
 
-export default function Edit(content_type, fields, required_fields) {
+export default function Edit(fields) {
+	const base_route = window.location.pathname.split("/")[1];
+	const { id, parent, parentID } = useParams(); // for navigation after create 
 	const navigate = useNavigate();
 	const classes = useStyles();
-
-	// Collect params
-	const { id } = useParams();
-	
 	let time_zone = false;
 	
+
 	let form_dict = {};
-	fields.map(field =>{
+	fields.forEach((value, field) => {
 		if (field.includes(Constants.TIMESTRIN)) {
 			form_dict[field] = dayjs();
-			time_zone = true;
+			time_zone = true;	
 		}else{
-			form_dict[field] = '';
-		}
-	}); 
-
+			form_dict[field] = value.fixed_value;
+		};
+	});
 	const initialFormData = Object.freeze(form_dict);
+
+
+	// Define States
 	const [formData, updateFormData] = useState(initialFormData);
 	const [timezone, setTimezone] = React.useState('US/Pacific');
 	const [errorMessage, setErrorMessage] = useState('');
 
-	const convert_tz = (time_object) => {
-		return moment.tz(time_object.format('YYYY-MM-DDTHH:mm'), timezone).format();
-	};
-
 	useEffect(() => {
-		axiosInstance.get(`/${content_type}/` + id).then((response) => {
+		axiosInstance.get(`/${base_route}/` + id).then((response) => {
 			const data = {}; 
 			Object.entries(initialFormData).forEach(([key, _])=> {
 				data[key] = response.data[key];
@@ -67,7 +65,7 @@ export default function Edit(content_type, fields, required_fields) {
 		if (myField && myField.includes(Constants.TIMESTRIN)){
 			updateFormData({
 				...formData,
-				[myField]: convert_tz(e),
+				[myField]: utils.convert_tz(e, timezone),
 			});
 		}else{
 			updateFormData({
@@ -79,9 +77,13 @@ export default function Edit(content_type, fields, required_fields) {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		axiosInstance.put(`/${content_type}/${id}/`, formData)
+		axiosInstance.put(`/${base_route}/${id}/`, formData)
 		.then((response) => {
-			navigate({ pathname: `/${content_type}/${id}/`});
+			if (parent && parentID){
+				navigate({ pathname: `/${parent}/${parentID}/`}); 
+			}else{
+				navigate({ pathname: `/${base_route}/`});
+			};
 			window.location.reload();
 		})
 		.catch((error) => {
@@ -104,45 +106,41 @@ export default function Edit(content_type, fields, required_fields) {
 		});
 	};
 
-
-	const create_form = (field, required) =>{
-		let multiRows = false;
-		Constants.MULTIROWS.map( name => {
-			if (field.includes(name)){
-				multiRows = true; 
-			};
-		});
-	
-		if (field.includes(Constants.TIMESTRIN)){		
+	const build_block = (field) =>{
+		const label = field[0];
+		const required = field[1].required_view;
+		const changable = field[1].fixed_value ? false : true;
+		if (label.includes(Constants.TIMESTRIN)){
 			return (
-				<Grid item xs={12} key={field}>
-				<LocalizationProvider dateAdapter={AdapterDayjs}>
-				<Stack spacing={3}>
-					<DateTimePicker
-					required={required}
-					label={field}
-					value={formData[field]}
-					onChange={(e)=>handleChange(e, field)}
-					renderInput={(params) => <TextField {...params} />}
-					/>
-				</Stack>
-				</LocalizationProvider>
+				<Grid item xs={12} key={label}>
+					<LocalizationProvider dateAdapter={AdapterDayjs}>
+						<Stack spacing={13}>
+							<DateTimePicker
+							label={label}
+							value={formData[label]}
+							onChange={changable? (e)=>handleChange(e, label):null}
+							renderInput={
+								(params) => <TextField variant="outlined" required={required} {...params} />
+							}
+							/>
+						</Stack>
+					</LocalizationProvider>
 				</Grid>
 			);
 		}else{
 			return (
-				<Grid item xs={12} key={field}>
+				<Grid item xs={12} key={label}>
 					<TextField
 						variant="outlined"
 						required={required}
 						fullWidth
-						id={field}
-						label={field}
-						name={field}
-						value={formData[field]}
-						autoComplete={field}
-						onChange={1>2? handleChange:null }
-						multiline={multiRows}
+						id={label}
+						label={label}
+						name={label}
+						value={formData[label]}
+						autoComplete={label}
+						onChange={changable? handleChange:null}
+						multiline={utils.multiRowsField(label)}
 						minRows={8}
 					/>
 				</Grid>
@@ -155,27 +153,30 @@ export default function Edit(content_type, fields, required_fields) {
 			<CssBaseline />
 			<div className={classes.paper}>
 				<Typography component="h1" variant="h5">
-					Update {sanitizer(content_type)}
+					Update {utils.sanitizer(base_route)} {id}
 				</Typography>
 				<form className={classes.form} noValidate>
 					<Grid container spacing={2}>
 						{ time_zone && 
-						<Grid item xs={12} key={'timezone'}>
-							<InputLabel id="demo-simple-select-label">Time Zone</InputLabel>
-							<Select
-								labelId="demo-simple-select-label"
-								id="demo-simple-select"
-								value={timezone}
-								label="Timezone"
-								onChange={(e)=>{setTimezone(e.target.value)}}
-							>
-								<MenuItem value={'US/Pacific'}>US/Pacific</MenuItem>
-								<MenuItem value={'EST'}>EST</MenuItem>
-							</Select>
-						</Grid>}
-						{fields && fields.map((field, i) => {
-							return create_form(field, required_fields[i]);
-						})}
+							<Grid item xs={12} key={'timezone'}>
+								<InputLabel id="demo-simple-select-label">Time Zone</InputLabel>
+								<Select
+									labelId="demo-simple-select-label"
+									id="demo-simple-select"
+									value={timezone}
+									label="Timezone"
+									onChange={(e)=>{setTimezone(e.target.value)}}
+								>
+									<MenuItem value={'US/Pacific'}>US/Pacific</MenuItem>
+									<MenuItem value={'EST'}>EST</MenuItem>
+								</Select>
+							</Grid>
+						}
+						{ fields && 
+							Array.from(fields).map((field) => {
+								return build_block(field);
+							})
+						}
 					</Grid>
 					<Button
 						type="submit"
@@ -185,7 +186,7 @@ export default function Edit(content_type, fields, required_fields) {
 						className={classes.submit}
 						onClick={handleSubmit}
 					>
-						Update {content_type}
+						Update {base_route}
 					</Button>
 				</form>
 			</div>

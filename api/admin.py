@@ -10,6 +10,10 @@ class InventoryAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'quantity', 'description', 'content_type', 'object_id', 'content_object']
     search_fields = ['title', 'content']
 
+# @admin.register(Sensor)
+# class SensorAdmin(admin.ModelAdmin):
+#     search_fields = ['name']
+
 # @admin.register(InputOrder)
 # class InputOrderAdmin(admin.ModelAdmin):
 #     list_display = ['id', 'amount']

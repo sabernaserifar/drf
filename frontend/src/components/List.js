@@ -16,13 +16,14 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import EditIcon from '@material-ui/icons/Edit';
+import InfoIcon from '@mui/icons-material/Info';
 import Button from '@material-ui/core/Button';
 import { Pagination } from "@material-ui/lab";
 import usePagination from "./Pagination";
 import sanitizer from './sanitizer';
 
 
-const ItemsList = ({ posts, columns, content_type}) => {
+const ItemsList = ({ posts, columns, base_route}) => {
 	const classes = useStyles();
 	const navigate = useNavigate();
 
@@ -54,11 +55,11 @@ const ItemsList = ({ posts, columns, content_type}) => {
 							<TableBody>
 								{posts && posts.length !== 0 && _DATA.currentData().map((post) => {
 									return (
-										<TableRow 
+										<TableRow
+											key={post.id}  
 											hover  
-											selected={false}
-											key={post.id} 
-											onClick={() => navigate({pathname: `/${content_type}/${post.id}`})}
+											selected={false}											
+											// onClick={() => navigate({pathname: `/${content_type}/${post.id}`})}
 										>
 											{columns && columns.map((column, i) => {
 												if (column == 'content_object') {
@@ -85,14 +86,21 @@ const ItemsList = ({ posts, columns, content_type}) => {
 											<TableCell align="left">
 												<Link
 													color="textPrimary"
-													href={`/${content_type}/edit/${post.id}/`}
+													href={`/${base_route}/${post.id}`}
+													className={classes.link}
+												>
+													<InfoIcon></InfoIcon>
+												</Link>
+												<Link
+													color="textPrimary"
+													href={`/${base_route}/edit/${post.id}/`}
 													className={classes.link}
 												>
 													<EditIcon></EditIcon>
 												</Link>
 												<Link
 													color="textPrimary"
-													href={`/${content_type}/delete/${post.id}/`}
+													href={`/${base_route}/delete/${post.id}/`}
 													className={classes.link}
 												>
 													<DeleteForeverIcon></DeleteForeverIcon>
@@ -104,11 +112,11 @@ const ItemsList = ({ posts, columns, content_type}) => {
 								<TableRow key={'create'}>
 									<TableCell colSpan={columns.length+1} align="right">
 										<Button
-											href={`/${content_type}/create/`}
+											href={`/${base_route}/create/`}
 											variant="contained"
 											color="primary"
 										>
-											New {content_type}
+											New {base_route}
 										</Button>
 									</TableCell>
 								</TableRow>

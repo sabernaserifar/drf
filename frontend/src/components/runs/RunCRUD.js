@@ -1,59 +1,46 @@
 import ParentCreate from "../Create";
 import ParentDetail from "../Detail";
 import ParentEdit from "../Edit";
-
+import ParentDelete from "../Delete";
 import Load from "../Load";
 
+// Specify the fields that you want to show 
+// Note: same order will be used  
+// fixed_value: the value will be fixed at the given one 
+// required: if true it will be indicated that it is a required field
+let fields = [
+	['title', {fixed_value: '', required_view: true}], 
+	['description', {fixed_value: '', required_view: false}],
+	['location', {fixed_value: '', required_view: true}],
+	['start_time', {fixed_value: '', required_view: true}],
+	['end_time', {fixed_value: '', required_view: true}],
+];  
+
+// CRUD operations 
+
 export function Create () {
-	const content_type = 'runs';
-
-	// Note: the same order will be used to show forms 
-	const fields = [
-		['title', {fixed_value: '', required_view: true}],
-		['description', {fixed_value: '', required_view: false}],
-		['location', {fixed_value: '', required_view: true}],
-		['start_time', {fixed_value: '', required_view: false}],
-		['end_time', {fixed_value: '', required_view: false}],
-	]
-
-	const fields_map = new Map(fields);
-
-	return ParentCreate(content_type, fields_map);
+	return ParentCreate(new Map(fields));
 };
-
 
 export function List () {
-	const content_type = 'runs';
-	const columns = ['id', 'title', 'location', 'start_time', 'end_time'];
-	return Load(content_type, columns);
+	return Load(new Map(fields));
 };
-
 
 export function Detail () {
-	const content_type = 'runs';
-	const fields = [ 'title', 'description', 'location', 'updated', 'start_time', 'end_time'];
-	const input_inventory = 'input_runs';
-	const output_inventory = 'tags';
-	const required_set = new Set(['title', 'location']); 
-
-	let required_fields = [];
-	fields.map((_, i) => {
-		required_fields[i] = required_set.has(fields[i])? true : false;
-	});
-
-	return ParentDetail(content_type, fields, required_fields, input_inventory, output_inventory);
+	const children = [
+		{name: 'input_runs', label: 'Input', base_route: 'input_runs'},
+		{name: 'tags', label: 'Inventory', base_route: 'inventories'}
+	]; 
+	const parents = [];
+	return ParentDetail(new Map(fields), children, parents);
 };
 
-
 export function Edit () {
-	const content_type = 'runs';
-	const fields = [ 'title', 'description', 'location', 'start_time', 'end_time'];
-	const required_set = new Set(['title', 'location']); 
+	// To make a field unchangable provide a non-empty string for the fixed_value
+	// For example to fix the title: fields[0][1].fixed_value = 'true';   
+	return ParentEdit(new Map(fields));
+};
 
-	let required_fields = [];
-	fields.map((_, i) => {
-		required_fields[i] = required_set.has(fields[i])? true : false;
-	});
-
-	return ParentEdit(content_type, fields, required_fields);
+export function Delete () {
+	return ParentDelete();
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Children, useEffect, useState } from "react";
 import axiosInstance from './axios';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -6,6 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import useStyles from "./FormStyle";
 import * as Constants from "./DefaultParams";
 import sanitizer from "./sanitizer";
+import * as utils from './utils';
+import ShortDetail from "./ShortDetail";
+
 
 //MaterialUI
 import Button from '@material-ui/core/Button';
@@ -27,62 +30,65 @@ import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import Paper from '@mui/material/Paper';
 
 
-export default function Detail(content_type, fields, required_fields, input_inventory, output_inventory) {
-	// style classes
-	const classes = useStyles();
+export default function Detail(fields, children, parents) {
+	
+	const base_route = window.location.pathname.split("/")[1];
+	const { id, parent, parentID } = useParams(); // for navigation after create 
 	const navigate = useNavigate();
+	const classes = useStyles();
 
-
-	// Collect params
-	const { id } = useParams();
+	let parent_route = '';
+	if (parent && parentID){
+		parent_route = `${parent}/${parentID}`;
+	}
 	
 	let form_dict = {};
-	fields.map(field =>{
+	fields.forEach((_, field) => {
 		form_dict[field] = '';
-	}); 
+	});
 
+	children.map((child) => {
+		form_dict[child.name] = '';
+	});
+
+	parents.map((parent)=>{
+		form_dict[parent.name] = '';
+	});
 	const initialFormData = Object.freeze(form_dict);
+
+	// Define States
 	const [formData, updateFormData] = useState(initialFormData);
-	const [inputInventory, setInputInventory] = useState([]);
-	const [outputInventory, setOutputInventory] = useState([]);
+
 
 	useEffect(() => {
-		axiosInstance.get(`/${content_type}/` + id).then((response) => {
+		axiosInstance.get(`/${base_route}/` + id).then((response) => {
 			const data = {}; 
 			Object.entries(initialFormData).forEach(([key, _])=> {
 				data[key] = response.data[key];
 			});
 			updateFormData(data);
-			setInputInventory(response.data[input_inventory]);
-			setOutputInventory(response.data[output_inventory]);
 		});
 	}, [updateFormData]);
 
-	const create_form = (field, required) =>{
-		let multiRows = false;
-		Constants.MULTIROWS.map( name => {
-			if (field.includes(name)){
-				multiRows = true; 
-			};
-		});
-	
+	const build_block = (field) =>{
+		const label = field[0];
+		const required = field[1].required_view;
 		return (
 			<Grid item xs={12} key={field}>
 				<TextField
 					variant="outlined"
 					required={required}
 					fullWidth
-					id={field}
-					label={field}
-					name={field}
-					autoComplete={field}
-					multiline={multiRows}
+					id={label}
+					label={label}
+					name={label}
+					autoComplete={label}
+					multiline={utils.multiRowsField(label)}
 					minRows={8}
-					value={formData[field]}
+					value={formData[label]}
 				/>
 			</Grid>
 		);
-		
 	};
 	
 	return (
@@ -91,196 +97,34 @@ export default function Detail(content_type, fields, required_fields, input_inve
 				<CssBaseline />
 				<div className={classes.paper}>
 				<Typography component="h1" variant="h5">
-					{sanitizer(content_type)} {id} Details 
+					{sanitizer(base_route)} {id} Details 
 				</Typography>
 				<form className={classes.form} noValidate>
 					<Grid container spacing={2}>
-						{fields && fields.map((field, i) => {
-							return create_form(field, required_fields[i]);
-						})}
+						{fields && 
+							Array.from(fields).map((field) => {
+								return build_block(field);
+							})
+						}
 					</Grid>
 					<Button
 						variant="contained"
 						color="primary"
-						href={`/${content_type}/edit/${id}/`}
+						href={`/${base_route}/edit/${id}/`+parent_route}
 					>Edit</Button>
 					<Button className={classes.redButton} 
-						href={`/${content_type}/delete/${id}/`}
+						href={`/${base_route}/delete/${id}/`+parent_route}
 						variant="contained"
 					>Delete</Button>
 				</form>
 			</div>
 			</Container>
-			{ input_inventory && <Container maxWidth="md" component="main" style={{paddingTop: "50px"}}>
-				<Typography component="h1" variant="h5">
-					Input Items
-				</Typography>
-				<Paper className={classes.root}>
-					<TableContainer className={classes.container}>
-						<Table stickyHeader aria-label="sticky table">
-							<TableHead>
-								<TableRow>
-									<TableCell align="left">ID</TableCell>
-									<TableCell align="left">{sanitizer(content_type)} ID</TableCell>
-									<TableCell align="left">Inventory ID</TableCell>
-									<TableCell align="left">Amount</TableCell>
-									<TableCell align="left">Action</TableCell>
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{inputInventory && inputInventory.map((item) => {
-									return (
-										<TableRow key={item.id}>
-											<TableCell component="th" scope="row">
-												<Link
-													color="textPrimary"
-													href={'/input_runs/' + item.id}
-													className={classes.link}
-												>
-													{item.id}
-												</Link>
-											</TableCell>
-
-											<TableCell component="th" scope="row">
-												<Link
-													color="textPrimary"
-													href={'/runs/' + item.run}
-													className={classes.link}
-												>
-													{item.run}
-												</Link>
-											</TableCell>
-											<TableCell component="th" scope="row">
-												<Link
-													color="textPrimary"
-													href={'/inventories/' + item.inventory}
-													className={classes.link}
-												>
-													{item.inventory}
-												</Link>
-											</TableCell>
-											<TableCell align="left">
-												{item.amount}
-											</TableCell>
+			{
+				
 			
-											<TableCell align="left">
-												<Link
-													color="textPrimary"
-													href={`/${input_inventory}/edit/${item.id}/${content_type}/${id}`}
-													className={classes.link}
-												>
-													<EditIcon></EditIcon>
-												</Link>
-												<Link
-													color="textPrimary"
-													href={`/${input_inventory}/delete/${item.id}`}
-													className={classes.link}
-												>
-													<DeleteForeverIcon></DeleteForeverIcon>
-												</Link>
-											</TableCell>
-										</TableRow>
-									);
-								})}
-								<TableRow>
-									<TableCell colSpan={5} align="right">
-										<Button
-											href={`/${input_inventory}/create/${content_type}/${id}`}
-											variant="contained"
-											color="primary"
-										>
-											New Input
-										</Button>
-									</TableCell>
-								</TableRow>
-							</TableBody>
-						</Table>
-					</TableContainer>
-				</Paper>
-			</Container>}
-			
-			{ outputInventory && outputInventory.length !== 0 && <Container maxWidth="md" component="main" style={{paddingTop: "50px"}}>
-				<Typography component="h1" variant="h5">
-					Output Items
-				</Typography>
-				<Paper className={classes.root}>
-					<TableContainer className={classes.container}>
-						<Table stickyHeader aria-label="sticky table">
-							<TableHead>
-								<TableRow>
-									<TableCell align="left">ID</TableCell>
-									<TableCell align="left">Title</TableCell>
-									<TableCell align="left">Quantity</TableCell>
-									<TableCell align="left">Unit</TableCell>
-									<TableCell align="left">Created</TableCell>
-									<TableCell align="left">Updated</TableCell>
-									<TableCell align="left">Action</TableCell>
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{outputInventory.map((item) => {
-									return (
-										<TableRow 
-											hover  
-											selected={false}
-											key={item.id} 
-											onClick={() => navigate({pathname: `/inventories/${item.id}`})}
-										>
-											<TableCell component="th" scope="row">
-												<Link
-													color="textPrimary"
-													href={'/inventories/' + item.id}
-													className={classes.link}
-												>
-													{item.id}
-												</Link>
-											</TableCell>
-											<TableCell align="left">
-												{item.title}
-											</TableCell>
-											<TableCell align="left">
-												{item.quantity}
-											</TableCell>
-											<TableCell align="left">{item.unit}</TableCell>
-											<TableCell align="left">{item.timestamp}</TableCell>
-											<TableCell align="left">{item.updated}</TableCell>
-											<TableCell align="left">
-												<Link
-													color="textPrimary"
-													href={'/inventories/edit/' + item.id}
-													className={classes.link}
-												>
-													<EditIcon></EditIcon>
-												</Link>
-												<Link
-													color="textPrimary"
-													href={'/inventories/delete/' + item.id}
-													className={classes.link}
-												>
-													<DeleteForeverIcon></DeleteForeverIcon>
-												</Link>
-											</TableCell>
-										</TableRow>
-									);
-								})}
-								<TableRow>
-									<TableCell colSpan={7} align="right">
-										<Button
-											href={`/inventories/create/${content_type}/${id}`}
-											variant="contained"
-											color="primary"
-										>
-											New Output
-										</Button>
-									</TableCell>
-								</TableRow>
-							</TableBody>
-						</Table>
-					</TableContainer>
-				</Paper>
-			</Container>}
+			children && children.map((child)=>{
+				return ShortDetail(child, formData[child.name], `${base_route}/${id}`);
+			})}
 		</React.Fragment>
 	);
 }
-
-
