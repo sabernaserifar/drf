@@ -3,3 +3,4 @@ from .inventories import *
 from .orders import *
 from .purchases import *
 from .runs import *
+from .sensors import * 

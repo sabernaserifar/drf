@@ -23,8 +23,6 @@ import Select from '@mui/material/Select';
 
 
 export default function Create(fields) {
-	console.log('In create ', axiosInstance);
-
 	const base_route = window.location.pathname.split("/")[1];
 	const { parent, parentID } = useParams(); // for navigation after create 
 	const navigate = useNavigate();
@@ -63,7 +61,6 @@ export default function Create(fields) {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log('In create ',axiosInstance);
 		axiosInstance.post(`/${base_route}/`, formData)
 		.then((response) => {
 			if (parent && parentID){

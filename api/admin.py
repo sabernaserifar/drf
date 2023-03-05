@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import *
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.forms import Textarea
 from django.db import models
@@ -10,9 +11,9 @@ class InventoryAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'quantity', 'description', 'content_type', 'object_id', 'content_object']
     search_fields = ['title', 'content']
 
-# @admin.register(Sensor)
+# @admin.register(SensorFile)
 # class SensorAdmin(admin.ModelAdmin):
-#     search_fields = ['name']
+#     search_fields = ['upload', 'author']
 
 # @admin.register(InputOrder)
 # class InputOrderAdmin(admin.ModelAdmin):
@@ -53,27 +54,58 @@ class RunAdmin(admin.ModelAdmin):
     readonly_fields = ['timestamp', 'updated']
 
 
-class UserAdminConfig(UserAdmin):
-    model = NewUser
-    search_fields = ('email', 'user_name', 'first_name',)
-    list_filter = ('email',  'user_name', 'first_name', 'is_active', 'is_staff')
-    ordering = ('-start_date',)
-    list_display = ('email', 'id', 'user_name', 'first_name',
-                    'is_active', 'is_staff')
+# class UserAdminConfig(UserAdmin):
+#     model = NewUser
+#     search_fields = ('email', 'user_name', 'first_name',)
+#     list_filter = ('email',  'user_name', 'first_name', 'is_active', 'is_staff')
+#     ordering = ('-start_date',)
+#     list_display = ('email', 'id', 'user_name', 'first_name',
+#                     'is_active', 'is_staff')
+#     fieldsets = (
+#         (None, {'fields': ('email', 'user_name', 'first_name',)}),
+#         ('Permissions', {'fields': ('is_staff', 'is_active')}),
+#         ('Personal', {'fields': ('about',)}),
+#     )
+#     formfield_overrides = {
+#         models.TextField: {'widget': Textarea(attrs={'rows': 20, 'cols': 60})},
+#     }
+#     add_fieldsets = (
+#         (None, {
+#             'classes': ('wide',),
+#             'fields': ('email', 'user_name', 'first_name', 'password1', 'password2', 'is_active', 'is_staff')}
+#          ),
+#     )
+
+
+
+
+class UserAdmin(BaseUserAdmin):
+    model = get_user_model()
+    list_display = (
+        "email",
+        "is_staff",
+        "is_active",
+    )
+    list_filter = (
+        "email",
+        "is_staff",
+        "is_active",
+    )
     fieldsets = (
-        (None, {'fields': ('email', 'user_name', 'first_name',)}),
-        ('Permissions', {'fields': ('is_staff', 'is_active')}),
-        ('Personal', {'fields': ('about',)}),
+        (None, {"fields": ("email", "password")}),
+        ("Permissions", {"fields": ("is_staff", "is_active")}),
     )
-    formfield_overrides = {
-        models.TextField: {'widget': Textarea(attrs={'rows': 20, 'cols': 60})},
-    }
     add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'user_name', 'first_name', 'password1', 'password2', 'is_active', 'is_staff')}
-         ),
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email", "password1", "password2", "is_staff", "is_active"),
+            },
+        ),
     )
+    search_fields = ("email",)
+    ordering = ("email",)
 
 
-admin.site.register(NewUser, UserAdminConfig)
+admin.site.register(User, UserAdmin)

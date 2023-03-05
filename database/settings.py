@@ -97,7 +97,7 @@ WSGI_APPLICATION = 'database.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'example2',
+        'NAME': 'example4',
         'USER': 'postgres',
         'PASSWORD': 'Pgadmin4saber',
         'HOST': 'localhost',
@@ -176,7 +176,7 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
 # Custom user model
-AUTH_USER_MODEL = "api.NewUser"
+AUTH_USER_MODEL = "api.User"
 
 CORS_ALLOW_ALL_ORIGINS = True
 

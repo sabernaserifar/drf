@@ -47,9 +47,22 @@ export default function Create() {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 
+// {headers: {'content-type': 'text/csv'}}
+		//'multipart/form-data'
+// Content-Disposition: attachment; filename="cool.html"
+//									'Content-Disposition': 'attachment; filename="demo5.csv"' 
 
-		axiosInstance.post(`/${base_route}/`, file, {headers: {'content-type': 'text/csv'}})
+		// axiosInstance.post(`/${base_route}/`, {'file_uploaded': file}, {headers: {'content-type': 'multipart/form-data'}})
+		axiosInstance.post(`/sensor_readings/`, file, {headers: {'content-type': 'text/csv'}})
 		.then((response) => {
+			// Now store the sensor data in database 
+			// axiosInstance.post(`/sensor_readings/`, file, {headers: {'content-type': 'text/csv'}})
+			// .catch((error)=>{
+			// 	console.log(error)
+			// });
+			
+			
+			
 			if (parent && parentID){
 				navigate({ pathname: `/${parent}/${parentID}/`}); 
 			}else{
@@ -73,7 +86,7 @@ export default function Create() {
 				// Something happened in setting up the request that triggered an Error
 				console.log('Error', error.message);
 			}
-			// console.log(error.config);
+			console.log(error);
 		});
 	};
 

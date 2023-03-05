@@ -3,6 +3,8 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.contrib.auth.models import AbstractUser
+
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from simple_history.models import HistoricalRecords
@@ -85,8 +87,12 @@ class InputRun(models.Model):
 class Sensor(models.Model):
     name = models.CharField(max_length=50)
 
+class SensorFile(models.Model):
+    upload = models.FileField(upload_to='uploads/%Y/%m/%d/')
 
 class SensorReading(models.Model):
+    # author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sensor_files', null=True, on_delete=models.SET_NULL)
+    # upload = models.ForeignKey(SensorFile, on_delete=models.DO_NOTHING)
     time = models.DateTimeField(primary_key=True, default=datetime.now)
     value = models.DecimalField(max_digits=10, decimal_places=4)
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
@@ -95,6 +101,10 @@ class SensorReading(models.Model):
         managed = False
         db_table = 'api_sensorreading'
         unique_together = ['sensor', 'time']
+
+
+    
+
 
 # migrations.RunSQL(
 #             sql=[(
@@ -136,51 +146,104 @@ class SensorReading(models.Model):
 #         return f'{self.id}:{self.name}:{self.quantity}:{self.unit}'
 
 
-class CustomAccountManager(BaseUserManager):
+# class CustomAccountManager(BaseUserManager):
 
-    def create_superuser(self, email, user_name, first_name, password, **other_fields):
+#     def create_superuser(self, email, user_name, first_name, password, **other_fields):
 
-        other_fields.setdefault('is_staff', True)
-        other_fields.setdefault('is_superuser', True)
-        other_fields.setdefault('is_active', True)
+#         other_fields.setdefault('is_staff', True)
+#         other_fields.setdefault('is_superuser', True)
+#         other_fields.setdefault('is_active', True)
 
-        if other_fields.get('is_staff') is not True:
-            raise ValueError(
-                'Superuser must be assigned to is_staff=True.')
-        if other_fields.get('is_superuser') is not True:
-            raise ValueError(
-                'Superuser must be assigned to is_superuser=True.')
+#         if other_fields.get('is_staff') is not True:
+#             raise ValueError(
+#                 'Superuser must be assigned to is_staff=True.')
+#         if other_fields.get('is_superuser') is not True:
+#             raise ValueError(
+#                 'Superuser must be assigned to is_superuser=True.')
 
-        return self.create_user(email, user_name, first_name, password, **other_fields)
+#         return self.create_user(email, user_name, first_name, password, **other_fields)
 
-    def create_user(self, email, user_name, first_name, password, **other_fields):
+#     def create_user(self, email, user_name, first_name, password, **other_fields):
 
+#         if not email:
+#             raise ValueError(_('You must provide an email address'))
+
+#         email = self.normalize_email(email)
+#         user = self.model(email=email, user_name=user_name,
+#                           first_name=first_name, **other_fields)
+#         user.set_password(password)
+#         user.save()
+#         return user
+
+class UserManager(BaseUserManager):
+    """
+    Custom user model manager where email is the unique identifiers
+    for authentication instead of usernames.
+    """
+
+    def create_user(self, email, password=None, **extra_fields):
+        """
+        Create and save a User with the given email and password.
+        """
         if not email:
-            raise ValueError(_('You must provide an email address'))
-
+            raise ValueError(_("The Email must be set"))
         email = self.normalize_email(email)
-        user = self.model(email=email, user_name=user_name,
-                          first_name=first_name, **other_fields)
+        user = self.model(email=email, **extra_fields)
         user.set_password(password)
-        user.save()
+        user.save(using=self._db)
         return user
 
+    def create_superuser(self, email, password=None, **extra_fields):
+        """
+        Create and save a SuperUser with the given email and password.
+        """
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
 
-class NewUser(AbstractBaseUser, PermissionsMixin):
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError(_("Superuser must have is_staff=True."))
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError(_("Superuser must have is_superuser=True."))
+        return self.create_user(email, password, **extra_fields)
 
-    email = models.EmailField(_('email address'), unique=True)
-    user_name = models.CharField(max_length=150, unique=True)
-    first_name = models.CharField(max_length=150, blank=True)
-    start_date = models.DateTimeField(default=timezone.now)
-    about = models.TextField(_(
-        'about'), max_length=500, blank=True)
-    is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
+class User(AbstractUser):
+    username = None
+    email = models.EmailField(unique=True, max_length=150)
 
-    objects = CustomAccountManager()
+    has_finished_tutorial = models.BooleanField(default=False)
+    avatar = models.FileField(upload_to="avatars/", default="avatars/default.png")
+    first_name = models.CharField(default="", max_length=40, blank=True)
+    last_name = models.CharField(default="", max_length=40, blank=True)
+    phone = models.CharField(default="", max_length=20, blank=True)
+    channel = models.CharField(null=True, unique=True, max_length=100)
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['user_name', 'first_name']
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+
+    objects = UserManager()
 
     def __str__(self):
-        return self.user_name
+        return self.email
+
+
+# class NewUser(AbstractBaseUser, PermissionsMixin):
+
+#     email = models.EmailField(_('email address'), unique=True)
+#     user_name = models.CharField(max_length=150, unique=True)
+#     first_name = models.CharField(max_length=150, blank=True)
+#     start_date = models.DateTimeField(default=timezone.now)
+#     about = models.TextField(_(
+#         'about'), max_length=500, blank=True)
+#     is_staff = models.BooleanField(default=False)
+#     is_active = models.BooleanField(default=False)
+
+#     objects = CustomAccountManager()
+
+#     USERNAME_FIELD = 'email'
+#     REQUIRED_FIELDS = ['user_name', 'first_name']
+
+#     def __str__(self):
+#         return self.user_name
+
+
