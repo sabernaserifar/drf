@@ -97,7 +97,7 @@ WSGI_APPLICATION = 'database.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'example4',
+        'NAME': 'epicdb',
         'USER': 'postgres',
         'PASSWORD': 'Pgadmin4saber',
         'HOST': 'localhost',
@@ -187,3 +187,5 @@ CORS_ALLOW_ALL_ORIGINS = True
 #     "http://192.168.0.241:3000",
 #
 # ]
+
+MEDIA_ROOT = 'Uploaded_files'

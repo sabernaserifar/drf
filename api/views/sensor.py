@@ -81,6 +81,11 @@ class SensorFileViewSet(viewsets.ModelViewSet):
     
 
     def create(self, request, *args, **kwargs):
+        print(request.FILES)
+        print(request.FILES.get('file_uploaded'))
+        print(request.FILES.get('Second_file'))
+
+        
         file_uploaded = {'upload': request.FILES.get('file_uploaded')}
         serializer = self.get_serializer(data=file_uploaded)
         serializer.is_valid(raise_exception=True)        

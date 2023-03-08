@@ -35,14 +35,19 @@ export default function Create() {
     const { parent, parentID} = useParams();
 	
 	const [file, setFile] = useState();
+	const [file2, setFile2] = useState();
+
     const [errorMessage, setErrorMessage] = useState('');
 
 	
 
     function handleChange(event) {
-        console.log('Handle')
         setFile(event.target.files[0])
       }
+
+	function handleChange2(event) {
+	setFile2(event.target.files[0])
+	}
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
@@ -52,8 +57,8 @@ export default function Create() {
 // Content-Disposition: attachment; filename="cool.html"
 //									'Content-Disposition': 'attachment; filename="demo5.csv"' 
 
-		// axiosInstance.post(`/${base_route}/`, {'file_uploaded': file}, {headers: {'content-type': 'multipart/form-data'}})
-		axiosInstance.post(`/sensor_readings/`, file, {headers: {'content-type': 'text/csv'}})
+		axiosInstance.post(`/${base_route}/`, {'file_uploaded': file, 'Second_file':file2}, {headers: {'content-type': 'multipart/form-data'}})
+		// axiosInstance.post(`/sensor_readings/`, file, {headers: {'content-type': 'text/csv'}})
 		.then((response) => {
 			// Now store the sensor data in database 
 			// axiosInstance.post(`/sensor_readings/`, file, {headers: {'content-type': 'text/csv'}})
@@ -102,6 +107,8 @@ export default function Create() {
 					<Grid container spacing={2}>
 						
 					<input type="file" onChange={handleChange}/>
+					<input type="file" onChange={handleChange2}/>
+
 					</Grid>
 					<Button
 						type="submit"
@@ -113,6 +120,13 @@ export default function Create() {
 					>
 						Create {base_route}
 					</Button>
+
+					
+					
+
+					
+
+
 				</form>
 			</div>
 				{ errorMessage &&
