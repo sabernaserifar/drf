@@ -1,5 +1,5 @@
 # not sure about the right import
-from api.models import Sensor, SensorReading, SensorFile
+from api.models import Sensor, SensorReading, FileUpload, SensorFileOperation, Operation
 import csv
 # import pandas as pd
 from typing import Dict, List
@@ -17,8 +17,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 
 # from api.models import SensorFile
-from api.serializers import SensorReadingSerializer, SensorFileSerializer
-
+from api.serializers import SensorReadingSerializer, SensorFileSerializer, SensorFileOperationSerializer
 
 class CSVTextParser(BaseParser):
     """
@@ -43,9 +42,17 @@ class CSVTextParser(BaseParser):
         csv_table = list(csv.reader(txt.splitlines(), dialect=dialect))
         return csv_table
 
+
+class SensorFileOperationViewSet(viewsets.ModelViewSet):
+    queryset = SensorFileOperation.objects.all()
+    serializer_class = SensorFileOperationSerializer
+    permissions_classes = [permissions.AllowAny]
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
 class SensorReadingViewSet(viewsets.ModelViewSet):
     queryset = SensorReading.objects.all()
-    serializer_class = SensorReadingSerializer(many=True)
+    serializer_class = SensorReadingSerializer
     permissions_classes = [permissions.AllowAny]
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     parser_classes = [CSVTextParser]
@@ -73,7 +80,7 @@ class SensorReadingViewSet(viewsets.ModelViewSet):
         # return Response(sensor_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class SensorFileViewSet(viewsets.ModelViewSet):
-    queryset = SensorFile.objects.all()
+    queryset = FileUpload.objects.all()
     serializer_class = SensorFileSerializer
     permissions_classes = [permissions.AllowAny]
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -84,7 +91,7 @@ class SensorFileViewSet(viewsets.ModelViewSet):
         print(request.FILES)
         print(request.FILES.get('file_uploaded'))
         print(request.FILES.get('Second_file'))
-
+         
         
         file_uploaded = {'upload': request.FILES.get('file_uploaded')}
         serializer = self.get_serializer(data=file_uploaded)
@@ -99,7 +106,7 @@ class RegisterDataViewSet(viewsets.ModelViewSet):
     queryset = SensorReading.objects.all()
     serializer_class = SensorReadingSerializer
     permissions_classes = [permissions.AllowAny]
-    parser_classes = [CSVTextParser]
+    parser_classes = [MultiPartParser]
 
     def get_serializer(self, *args, **kwargs):
         if isinstance(kwargs.get("data", {}), list):
@@ -109,24 +116,85 @@ class RegisterDataViewSet(viewsets.ModelViewSet):
             *args, **kwargs
         )
 
-    def create(self, request, *args, **kwargs):
+    def build_objects_list(self, data_file, parent_id, file_id):
+        time_format = '%Y-%m-%d %H:%M:%S.%f'
         objects = []
-        csv_data = request.data
-        for item in csv_data:
+        for i in range(len(data_file)):
+            item = data_file[i]
+            try:
+                sensor_name = item[0].strip()
+                sensor_id = Sensor.objects.filter(label=sensor_name.upper()).first().id
+            except:
+                return f'The sensor "{sensor_name}" at row {i+1} is not recognized.'
+
+            try:
+                timestamp = datetime.datetime.strptime(item[1].strip(), time_format).replace(
+                tzinfo=datetime.timezone.utc)
+            except:
+                return f'The timestamp "{item[1].strip()}" at row {i+1} is not valid.'
+
+            
+            try:
+                value = float(item[2].strip())
+            except:
+                return f'The value "{value}" at row {i+1} is not valid number.'
+        
             objects.append({
-                'upload': 1, #SensorFile.objects.filter(id=1).first(),
-                'sensor': 1, #Sensor.objects.filter(id=1).first(),
-                'time': datetime.datetime.strptime(item[1].strip(), '%Y-%m-%d %H:%M:%S.%f').replace(
-                    tzinfo=datetime.timezone.utc),
-                'value': float(item[2])
+                'operation': parent_id,
+                'input_file': file_id, 
+                'sensor': sensor_id,
+                'time': timestamp,
+                'value': value,
+                'unit': 0
             })
+        
+        return objects
+    
+    
+    def create(self, request, *args, **kwargs):
+        # Check if the  file was uploaded 
+        if request.FILES.get('sensor_file') is None:
+            msg = 'Sensor text/csv file was not found.'
+            return Response({'file': msg }, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            parent_id = int(request.data['parent_file'])
+        except:
+            msg = 'Request does not have the ID for the parent of uploaded file.'
+            return Response({'file': msg }, status=status.HTTP_404_NOT_FOUND)
+
+        csv_file = request.FILES.get('sensor_file')
+        try:
+            parser = CSVTextParser()
+            with csv_file.open() as opened_csv_file:
+                csv_data = parser.parse(opened_csv_file, media_type=parser.media_type)
+                file_object = FileUpload.objects.create(upload=csv_file)
+        except:
+            msg = f'{csv_file.name} is not a valid text/csv file.'
+            return Response({'file': msg}, status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
+
+        objects = self.build_objects_list(csv_data, parent_id, file_object.id)
+
+        if isinstance(objects, str):
+            # Remove the object file and the storage 
+            file_object.upload.delete()
+            file_object.delete()
+            return Response({'file': objects}, status=status.HTTP_400_BAD_REQUEST) 
+
+        try:
+            SensorFileOperation.objects.create(
+                operation=Operation.objects.filter(id=parent_id).first(),
+                fileupload=file_object)      
+        except:
+            return Response({'sensor_file': 'Could not create sensor file operation object'}, status=status.HTTP_400_BAD_REQUEST)
+        
 
         serializer = self.get_serializer(data=objects)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
 
 
 # class RegisterData(views.APIView):

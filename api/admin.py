@@ -8,8 +8,17 @@ from django.db import models
 
 @admin.register(Inventory)
 class InventoryAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'quantity', 'description', 'content_type', 'object_id', 'content_object']
+    list_display = ['id', 'title', 'quantity', 'content_type', 'object_id', 'content_object']
     search_fields = ['title', 'content']
+
+
+@admin.register(Equipment)
+class EquipmentAdmin(admin.ModelAdmin):
+    list_display = ['id', 'label', 'model', 'location']
+
+@admin.register(Sensor)
+class SensorAdmin(admin.ModelAdmin):
+    list_display = ['id', 'label', 'equipment_id','model', 'location']
 
 # @admin.register(SensorFile)
 # class SensorAdmin(admin.ModelAdmin):
@@ -22,36 +31,51 @@ class InventoryAdmin(admin.ModelAdmin):
 
 class InventoryInline(GenericTabularInline):
     model = Inventory
+    extra = 1 
 
 class InputOrderInline(admin.TabularInline):
     model = InputOrder
 
-class InputRunInline(admin.TabularInline):
-    model = InputRun
+class InputOperationInline(admin.TabularInline):
+    model = InputOperation
+
+class EquipmentInline(admin.TabularInline):
+    model = Equipment
 
 
 
 @admin.register(Purchase)
 class PurchaseAdmin(admin.ModelAdmin):
     inlines = [InventoryInline]
-    list_display = ['title', 'updated', 'author']
+    list_display = ['title', 'updated', 'user']
     readonly_fields = ['timestamp', 'updated']
     #raw_id_fields = ['author']
 
-@admin.register(Order)
+@admin.register(CustomerOrder)
 class OrderAdmin(admin.ModelAdmin):
     inlines = [InventoryInline, InputOrderInline]
-    list_display = ['title', 'updated', 'author']
+    list_display = ['title', 'updated', 'user']
     readonly_fields = ['timestamp', 'updated']
 
 
 
 
-@admin.register(Run)
-class RunAdmin(admin.ModelAdmin):
-    inlines = [InventoryInline, InputRunInline]
-    list_display = ['title', 'updated', 'author']
+@admin.register(Operation)
+class OperationAdmin(admin.ModelAdmin):
+    inlines = [InventoryInline, InputOperationInline]
+    list_display = ['title', 'updated', 'user', 'start_time', 'end_time']
     readonly_fields = ['timestamp', 'updated']
+
+
+@admin.register(OperationType)
+class OperationTypeAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(FileUpload)
+class FileUplaodAdmin(admin.ModelAdmin):
+    pass
+    
 
 
 # class UserAdminConfig(UserAdmin):

@@ -1,10 +1,6 @@
 import {makeStyles} from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
-	redButton: {
-		color: "white",
-		backgroundColor: "red",
-	},
 	paper: {
 		marginTop: theme.spacing(8),
 		display: 'flex',
@@ -34,6 +30,10 @@ const useStyles = makeStyles((theme) => ({
 		fontSize: '16px',
 		textAlign: 'left',
 	},
+	redButton: {
+		color: "white",
+		backgroundColor: "red",
+	},
 	editButton1: {
 		color : "primary",
 	},
@@ -41,6 +41,9 @@ const useStyles = makeStyles((theme) => ({
 		color : "white",
 		background: "red"
 	},
+	uploadButton: {
+		textTransform: 'none',
+	},	
 	container: {
         flex: 1,
         flexDirection: 'row',

@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import axiosInstance from './axios';
 import {useNavigate, useParams} from 'react-router-dom';
 import { redirect } from "react-router-dom";
-import * as Constants from "./DefaultParams";
 import useStyles from "./FormStyle";
 import * as utils from './utils';
 //MaterialUI

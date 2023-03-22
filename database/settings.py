@@ -97,7 +97,7 @@ WSGI_APPLICATION = 'database.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'epicdb',
+        'NAME': 'epic',
         'USER': 'postgres',
         'PASSWORD': 'Pgadmin4saber',
         'HOST': 'localhost',
@@ -188,4 +188,4 @@ CORS_ALLOW_ALL_ORIGINS = True
 #
 # ]
 
-MEDIA_ROOT = 'Uploaded_files'
+MEDIA_ROOT = 'FileStorage'

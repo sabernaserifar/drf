@@ -8,37 +8,68 @@ import Load from "../Load";
 // Note: same order will be used  
 // fixed_value: the value will be fixed at the given one 
 // required: if true it will be indicated that it is a required field
+const settings = ({default_value='', changable=true, field_type='String', required_view=true, help_text=''} = {}) => {
+	return {
+		default_value: default_value, 
+		changable: changable, 
+		field_type: field_type, 
+		required_view: required_view, 
+		help_text: help_text,
+	};
+};
+
 let fields = [
-	['title', {fixed_value: '', required_view: true}], 
-	['description', {fixed_value: '', required_view: false}],
-	['location', {fixed_value: '', required_view: true}],
-	['start_time', {fixed_value: '', required_view: true}],
-	['end_time', {fixed_value: '', required_view: true}],
-];  
+	['title', settings()], 
+	['operation_type', settings({help_text: 'A valid operation label (e.g. RUN or Test)'})], 
+	['equipment', settings({help_text: 'A valid equipment label (string)'})], 
+	['description', settings({required_view: false})],
+	['location', settings()],
+	['start_time', settings({field_type: 'timestamp'})],
+	['end_time', settings({field_type: 'timestamp'})],
+	['result_kvp', settings({default_value: '{}', field_type: 'JSON', help_text: 'E.g. {"Completed" : true, "Temperature": 100.5}'})],
+	['result_file', settings({field_type: 'file', help_text: 'Upload any supplementary file'})],
+
+]; 
 
 // CRUD operations 
 
 export function Create () {
-	return ParentCreate(new Map(fields));
+	const exclude = [];
+	const include_fields = fields.filter(field => !exclude.includes(field[0]));
+	return ParentCreate(new Map(include_fields));
 };
 
 export function List () {
-	return Load(new Map(fields));
+	// exclude the following fields
+	const exclude = ['result_kvp', 'result_file'];
+	const include_fields = fields.filter(field => !exclude.includes(field[0]));	
+	return Load(new Map(include_fields), []);
 };
 
 export function Detail () {
+	const exclude = [];
+	let include_fields = fields.filter(field => !exclude.includes(field[0]));
+
+	include_fields.map((_, i)=>{
+		include_fields[i][1].changable = false;
+	});
+
+
 	const children = [
-		{name: 'input_runs', label: 'Input', base_route: 'input_runs'},
-		{name: 'tags', label: 'Inventory', base_route: 'inventories'}
+		{name: 'input_operations', label: 'Input', base_route: 'input_operations'},
+		{name: 'tags', label: 'Inventory', base_route: 'inventories'},
+		{name: 'timeseries', label: 'FileUpload', base_route: 'sensor_readings'}
 	]; 
 	const parents = [];
-	return ParentDetail(new Map(fields), children, parents);
+	return ParentDetail(new Map(include_fields), children, parents);
 };
 
 export function Edit () {
+	const exclude = [];
+	const include_fields = fields.filter(field => !exclude.includes(field[0]));
 	// To make a field unchangable provide a non-empty string for the fixed_value
 	// For example to fix the title: fields[0][1].fixed_value = 'true';   
-	return ParentEdit(new Map(fields));
+	return ParentEdit(new Map(include_fields));
 };
 
 export function Delete () {

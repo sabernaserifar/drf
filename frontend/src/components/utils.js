@@ -1,7 +1,5 @@
 import moment from 'moment-timezone';
-import * as Constants from "./DefaultParams";
-import ParentShortDetail from "./ShortDetail";
-
+import FieldOptions from "./FieldOptions";
 
 export function convert_tz(time_object, timezone) {
     return moment.tz(time_object.format('YYYY-MM-DDTHH:mm'), timezone).format();
@@ -15,14 +13,49 @@ export function sanitizer(word) {
     return frags.join(' ');
 };
 
-export function multiRowsField(label) {
-  var is_required = false
-  for (var i = 0; i < Constants.MULTIROWS.length; i++) {
-    if (label.includes(Constants.MULTIROWS[i])){
-      is_required = true;
+const check_field = (label, key) => {
+  const options = FieldOptions();
+  // console.log(Object.keys(options))
+  if (!(Object.keys(options).includes(key))){
+    console.log(label, key)
+    return false 
+  }
+  var exists = false
+  for (var i = 0; i < options[key].length; i++) {
+    if (label.includes(options[key][i])){
+      exists = true;
       break;
     }
   };
-  return is_required;
+  return exists 
 };
+
+
+export function is_time_field(label){
+  return check_field(label, 'TIMESTRING');
+};
+
+export function is_date_field(label){
+  return check_field(label, 'DATETIMESTRING');
+};
+
+export function multiRowsField(label) {
+  return check_field(label, 'MULTIROWS');
+};
+
+export function is_file_upload(label) {
+  return check_field(label, 'FILEUPLOAD');
+};
+
+export function is_file_field(label) {
+  return check_field(label, 'FILEFIELD');
+};
+
+export function is_file_sensor(label) {
+  return check_field(label, 'FILESENSOR');
+};
+
+
+
+
 

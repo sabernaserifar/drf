@@ -21,27 +21,63 @@ import usePagination from "./Pagination";
 import sanitizer from './sanitizer';
 import Typography from '@material-ui/core/Typography';
 
+function index(obj, is, value) {
+    if (typeof is == 'string')
+        return index(obj,is.split('.'), value);
+    else if (is.length==1 && value!==undefined)
+        return obj[is[0]] = value;
+    else if (is.length==0)
+        return obj;
+    else
+        return index(obj[is[0]],is.slice(1), value);
+}
+
+function get_delete_route(child, post){
+	let delete_route = `/${child.base_route}/delete/${post.id}/`;
+	// For deleting sensor reading, we delete the corresponding uploaded files 
+	// which also deletes all sensor readings data 
+	if (child.label === 'SensorFileUpload'){
+		delete_route = `/file_uploads/delete/${index(post, 'fileupload.id' )}/`;
+	}
+	return delete_route;
+}
+
+function get_detail_route(child, post){
+	let detail_route = `/${child.base_route}/${post.id}/`;
+	// For deleting sensor reading, we delete the corresponding uploaded files 
+	// which also deletes all sensor readings data 
+	if (child.label === 'SensorFileUpload'){
+		detail_route = `/file_uploads/${index(post, 'fileupload.id' )}/`;
+	}
+	return detail_route;
+}
 
 
 const ShortDetail = (child, posts, current_route) => {
-
 	const classes = useStyles();
 	const navigate = useNavigate();
 
-	let columns = [];
-	if (child.label === 'Input'){
-		columns = ['id', 'run', 'inventory', 'amount'];
-	}else if (child.label === 'Inventory') {
-		columns = ['id', 'title', 'quantity', 'unit'];
-	} else {
-		columns = [];
-	};
+	const columns = child.columns;
+
+	// let columns = [];
+	// if (child.label === 'Input'){
+	// 	columns = ['id', 'operation', 'inventory', 'quantity'];
+	// }else if (child.label === 'Inventory') {
+	// 	columns = ['id', 'title', 'quantity', 'unit'];
+	// }else if (child.label === 'SensorFileUpload'){
+	// 	columns = ['id', 'fileupload.file_url']
+	// } else {
+	// 	columns = [];
+	// };
 
 
 	// Pagination 
 	let [page, setPage] = useState(1);
+	if (posts){
+
+	}
 	const PER_PAGE = 10;
-	const count = Math.ceil(posts.length / PER_PAGE);
+	const count = posts? Math.ceil(posts.length / PER_PAGE):1;
 	const _DATA = usePagination(posts, PER_PAGE);
   
 	const handleChange = (e, p) => {
@@ -79,7 +115,7 @@ const ShortDetail = (child, posts, current_route) => {
 											{columns && columns.map((column, i) => {
 												return  (
 														<TableCell component="th" scope="row" key={'column'+i}>
-															{post[column]}
+															{index(post, column)}
 														</TableCell>
 													);	
 												
@@ -87,7 +123,7 @@ const ShortDetail = (child, posts, current_route) => {
 											<TableCell align="right">
 												<Link
 													color="textPrimary"
-													href={`/${child.base_route}/${post.id}/`+current_route}
+													href={get_detail_route(child, post)+current_route}
 													className={classes.link}
 												>
 													<InfoIcon></InfoIcon>
@@ -101,7 +137,7 @@ const ShortDetail = (child, posts, current_route) => {
 												</Link>
 												<Link
 													color="textPrimary"
-													href={`/${child.base_route}/delete/${post.id}/`+current_route}
+													href={get_delete_route(child, post)+current_route}
 													className={classes.link}
 												>
 													<DeleteForeverIcon></DeleteForeverIcon>
@@ -116,6 +152,7 @@ const ShortDetail = (child, posts, current_route) => {
 											href={`/${child.base_route}/create/`+current_route}
 											variant="contained"
 											color="primary"
+											className={classes.uploadButton}
 										>
 											New {child.base_route}
 										</Button>

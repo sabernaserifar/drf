@@ -2,7 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 from generic_relations.relations import GenericRelatedField
 from rest_framework import serializers
 
-from api.models import Inventory, Purchase, Order, Run
+from api.models import Inventory, Purchase, Operation
 
 
 class InventorySerializer(serializers.ModelSerializer):
@@ -11,12 +11,8 @@ class InventorySerializer(serializers.ModelSerializer):
             queryset=Purchase.objects.all(),
             view_name='purchases-detail',
         ),
-        Order: serializers.HyperlinkedRelatedField(
-            queryset=Order.objects.all(),
-            view_name='orders-detail',
-        ),
-        Run: serializers.HyperlinkedRelatedField(
-            queryset=Run.objects.all(),
+        Operation: serializers.HyperlinkedRelatedField(
+            queryset=Operation.objects.all(),
             view_name='runs-detail',
         ),
     }, required=False)

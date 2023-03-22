@@ -26,13 +26,21 @@ class Inventory(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 
+    class Meta:
+        ordering = ['-updated']
+
 
 class FileUpload(models.Model):
     upload = models.FileField(upload_to='uploads/%Y/%m/%d/')
+    timestamp = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated']
 
 
 class Maintenance(models.Model):
-    instruction_file = models.ForeignKey(FileUpload, blank=True, null=True, on_delete=models.SET_NULL)
+    supp_file = models.ForeignKey(FileUpload, blank=True, null=True, on_delete=models.SET_NULL)
     title = models.CharField(max_length=250)
     description = models.TextField(blank=True, null=True)
     location = models.TextField(blank=True, null=True)
@@ -43,11 +51,14 @@ class Maintenance(models.Model):
     cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    info_kvp = models.JSONField(blank=True, null=True)
+    supp_kvp = models.JSONField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-updated']
 
 
 class Purchase(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='purchases', on_delete=models.SET_NULL)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='purchases', on_delete=models.SET_NULL)
     title = models.CharField(max_length=250)
     description = models.TextField(blank=True, null=True)
     vendor = models.CharField(max_length=250)
@@ -58,15 +69,15 @@ class Purchase(models.Model):
     active = models.BooleanField(default=True)
     order_time = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
     delivery_time = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
-    supplementary_file = models.ForeignKey(FileUpload, blank=True, null=True, on_delete=models.SET_NULL)
+    supp_file = models.ForeignKey(FileUpload, blank=True, null=True, on_delete=models.SET_NULL)
     tags = GenericRelation(Inventory)
 
     class Meta:
-        ordering = ['updated']
+        ordering = ['-updated']
 
 
 class Equipment(models.Model):
-    manual_file = models.ForeignKey(FileUpload, blank=True, null=True, on_delete=models.SET_NULL)
+    supp_file = models.ForeignKey(FileUpload, blank=True, null=True, on_delete=models.SET_NULL)
     maintenance = models.ForeignKey(Maintenance, blank=True, null=True, on_delete=models.SET_NULL)
     label = models.CharField(max_length=50)
     model = models.CharField(max_length=50, null=True, blank=True)    
@@ -77,13 +88,16 @@ class Equipment(models.Model):
     installed = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    info_kvp = models.JSONField(blank=True, null=True)
+    supp_kvp = models.JSONField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-updated']
 
 
 class Sensor(models.Model):
-    manual_file = models.ForeignKey(FileUpload, blank=True, null=True, on_delete=models.SET_NULL)
+    supp_file = models.ForeignKey(FileUpload, blank=True, null=True, on_delete=models.SET_NULL)
     maintenance = models.ForeignKey(Maintenance, blank=True, null=True, on_delete=models.SET_NULL)
-    equipment = models.ForeignKey(Equipment, on_delete=models.SET_NULL)
+    equipment = models.ForeignKey(Equipment, blank=True, null=True, on_delete=models.SET_NULL)
     label = models.CharField(max_length=50)
     model = models.CharField(max_length=50, null=True, blank=True)    
     description = models.TextField(blank=True, null=True)
@@ -93,7 +107,10 @@ class Sensor(models.Model):
     installed = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    info_kvp = models.JSONField(blank=True, null=True)
+    supp_kvp = models.JSONField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-updated']
     
 
 class OperationType(models.Model):
@@ -101,22 +118,23 @@ class OperationType(models.Model):
 
 
 class Operation(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='operations', on_delete=models.SET_NULL)
-    operation_type = models.ForeignKey(OperationType, on_delete=models.SET_NULL)
-    equipment = models.ForeignKey(Equipment, on_delete=models.SET_NULL)
-    result_file = models.ForeignKey(FileUpload, null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='operations', on_delete=models.CASCADE)
+    operation_type = models.ForeignKey(OperationType, on_delete=models.CASCADE)
+    equipment = models.ForeignKey(Equipment, blank=True, null=True, on_delete=models.SET_NULL)
+    supp_file = models.ForeignKey(FileUpload, blank=True, null=True, on_delete=models.SET_NULL)
     title = models.CharField(max_length=250)
     description = models.TextField(blank=True, null=True)
-    location = models.TextField(blank=True, null=True)
+    location = models.TextField()
     start_time = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
     end_time = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    result_kvp = models.JSONField(blank=True, null=True)
+    supp_kvp = models.JSONField(blank=True, null=True)
+
     tags = GenericRelation(Inventory)
 
     class Meta:
-        ordering = ['updated']
+        ordering = ['-updated']
 
 
 class InputOperation(models.Model):
@@ -125,9 +143,15 @@ class InputOperation(models.Model):
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
 
 
+class SensorFileOperation(models.Model):
+    operation = models.ForeignKey(Operation, related_name='sensor_operation', on_delete=models.CASCADE)
+    fileupload = models.ForeignKey(FileUpload, on_delete=models.CASCADE)
+
+
 class SensorReading(models.Model):
-    sensor = models.ForeignKey(Sensor, on_delete=models.SET_NULL) # 2nd primary key, defined in migrations 
-    input_file = models.ForeignKey(FileUpload, on_delete=models.SET_NULL)
+    sensor = models.ForeignKey(Sensor, blank=True, null=True, on_delete=models.SET_NULL) # 2nd primary key, defined in migrations 
+    input_file = models.ForeignKey(FileUpload, blank=True, null=True, related_name="input_timeseries", on_delete=models.CASCADE)
+    operation = models.ForeignKey(Operation, related_name="timeseries", on_delete=models.CASCADE)
     time = models.DateTimeField(primary_key=True, default=datetime.now)
     value = models.DecimalField(max_digits=10, decimal_places=4)
     unit = models.CharField(max_length=50, blank=True, null=True)
@@ -143,7 +167,7 @@ class Customer(models.Model):
     email = models.EmailField(unique=True, max_length=150)
     phone = models.CharField(max_length=20, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
-    info_kvp = models.JSONField(blank=True, null=True)
+    supp_kvp = models.JSONField(blank=True, null=True)
     
 
 class Delivery(models.Model):
@@ -157,19 +181,19 @@ class CustomerOrder(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='orders', null=True, on_delete=models.SET_NULL)
     title = models.CharField(max_length=250)
     description = models.TextField(blank=True, null=True)
-    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL)    
+    customer = models.ForeignKey(Customer, blank=True, null=True, on_delete=models.SET_NULL)    
     price = models.DecimalField(max_digits=10, decimal_places=2)
     order_time = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
     delivery_time = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
-    delivery = models.ForeignKey(Delivery, on_delete=models.SET_NULL)
+    delivery = models.ForeignKey(Delivery, blank=True, null=True, on_delete=models.SET_NULL)
     active = models.BooleanField(default=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    invoice_file = models.ForeignKey(FileUpload, blank=True, null=True, on_delete=models.SET_NULL)
-    invoice_kvp = models.JSONField(blank=True, null=True)
+    supp_file = models.ForeignKey(FileUpload, blank=True, null=True, on_delete=models.SET_NULL)
+    supp_kvp = models.JSONField(blank=True, null=True)
 
     class Meta:
-        ordering = ['updated']
+        ordering = ['-updated']
 
 
 class InputOrder(models.Model):

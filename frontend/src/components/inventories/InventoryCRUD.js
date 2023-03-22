@@ -9,14 +9,36 @@ import { useParams } from "react-router-dom";
 // Note: same order will be used  
 // fixed_value: the value will be fixed at the given one 
 // required: if true it will be indicated that it is a required field
+const settings = ({default_value='', changable=true, field_type='String', required_view=true, help_text=''} = {}) => {
+	return {
+		default_value: default_value, 
+		changable: changable, 
+		field_type: field_type, 
+		required_view: required_view, 
+		help_text: help_text,
+	};
+};
+
 let fields = [
-    ['content_type', {fixed_value: '', required_view: true}],
-    ['object_id', {fixed_value: '', required_view: false}],
-	['title', {fixed_value: '', required_view: true}], 
-    ['description', {fixed_value: '', required_view: false}],
-	['quantity', {fixed_value: '', required_view: true}],
-	['unit', {fixed_value: '', required_view: true}],
-];  
+	['content_type', settings({changable: false, help_text: 'Source type name'})], 
+	['object_id', settings({changable: false, help_text: 'Source ID'})], 
+	['title', settings()],
+	['description', settings({required_view: false})],
+	['quantity', settings({help_text: 'Amount of material (e.g. 150.76)'})],
+	['unit', settings()],
+]; 
+
+//  Add this if you want to filter 
+let filter_fields = [
+	['id', settings({help_text: 'Match this exact id'})],
+	['content_type', settings({help_text: 'Content type includes ...'})],
+	['title', settings({help_text: 'Title includes ...'})],
+	['quantity', settings({help_text: 'Search within %5 of this value ...'})],
+	['unit', settings({help_text: 'Unit includes ...'})],
+	['date_min', settings()],
+	['date_max', settings()],
+]
+
 
 
 // CRUD operations 
@@ -24,15 +46,19 @@ let fields = [
 export function Create () {
     const {parent, parentID} = useParams();
 	if (parent && parentID){
-		fields[0][1].fixed_value = 'run';
-        fields[1][1].fixed_value = parentID;
+		fields[0][1].default_value = 'operation';
+        fields[1][1].default_value = parentID;
 
 	};   
 	return ParentCreate(new Map(fields));
 };
 
 export function List () {
-	return Load(new Map(fields));
+	fields.map((value, i) => {
+		fields[i][1].changable = true;
+	});
+
+	return Load(new Map(fields), new Map(filter_fields));
 };
 
 export function Detail () {

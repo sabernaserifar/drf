@@ -1,13 +1,13 @@
 import traceback
 from rest_framework import serializers
 
-from api.models import Inventory, Run, InputRun
+from api.models import Inventory, Operation, InputOperation
 from .inventories import TaggedInventorySerializer
 
 
 class InputRunSerializer(serializers.ModelSerializer):
     class Meta:
-        model = InputRun
+        model = InputOperation
         fields = '__all__'
 
     
@@ -23,7 +23,7 @@ class InputRunSerializer(serializers.ModelSerializer):
         inventory_instance.quantity -= requested_amount
         inventory_instance.save()
 
-        ModelClass =  InputRun
+        ModelClass =  InputOperation
         try:
             instance = ModelClass.objects.create(**validated_data)
         except TypeError:
@@ -61,6 +61,7 @@ class InputRunSerializer(serializers.ModelSerializer):
         if available_amount < requested_amount:
             err_msg = {'amount': [f'A value less than {available_amount} is required.']}
             raise serializers.ValidationError(err_msg)
+            
 
         # Return and update the amount in inventories   
         if current_inventory_instance == new_inventory_instance:
@@ -85,5 +86,5 @@ class RunSerializer(serializers.ModelSerializer):
     input_runs = InputRunSerializer(many=True, read_only=True)
 
     class Meta:
-        model = Run
+        model = Operation
         fields = '__all__'

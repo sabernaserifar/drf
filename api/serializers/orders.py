@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from api.models import Inventory, Order, InputOrder
+from api.models import Inventory, CustomerOrder, InputOrder
 from .inventories import TaggedInventorySerializer
 
 
@@ -34,5 +34,5 @@ class OrderSerializer(serializers.ModelSerializer):
     input_order = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
-        model = Order
+        model = CustomerOrder
         fields = '__all__'

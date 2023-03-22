@@ -2,12 +2,12 @@ from rest_framework import permissions
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
-from api.models import Run, InputRun, Inventory
+from api.models import Operation, InputOperation, Inventory
 from api.serializers import RunSerializer, InputRunSerializer
 
 
 class RunViewSet(viewsets.ModelViewSet):
-    queryset = Run.objects.all()
+    queryset = Operation.objects.all()
     serializer_class = RunSerializer
     permissions_classes = [permissions.AllowAny]
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -17,7 +17,7 @@ class RunViewSet(viewsets.ModelViewSet):
 
 
 class InputRunViewSet(viewsets.ModelViewSet):
-    queryset = InputRun.objects.all()
+    queryset = InputOperation.objects.all()
     serializer_class = InputRunSerializer
     permissions_classes = [permissions.AllowAny]
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly]

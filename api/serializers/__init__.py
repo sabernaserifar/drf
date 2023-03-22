@@ -3,4 +3,6 @@ from .inventories import *
 from .orders import *
 from .purchases import *
 from .runs import *
+from .operations import *
 from .sensors import * 
+from .fileuploads import *

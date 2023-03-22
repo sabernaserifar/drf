@@ -2,9 +2,9 @@ import React, {useState, useEffect } from 'react';
 import axiosInstance from './axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import useStyles from './FormStyle';
-import * as Constants from "./DefaultParams";
-import sanitizer from './sanitizer';
 import * as utils from './utils';
+import CreateBlock from './CreateBlock';
+import ProgressBar from "./ProgressBar";
 
 
 //MaterialUI
@@ -17,13 +17,14 @@ import Container from '@material-ui/core/Container';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
 
-import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
+// import {DateTimePicker} from '@mui/x-date-pickers/DateTimePicker';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import Stack from '@mui/material/Stack';
 import moment from 'moment-timezone';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
+import type_is from './check_type';
 
 
 export default function Edit(fields) {
@@ -36,11 +37,11 @@ export default function Edit(fields) {
 
 	let form_dict = {};
 	fields.forEach((value, field) => {
-		if (field.includes(Constants.TIMESTRIN)) {
+		if (utils.is_time_field(field)) {
 			form_dict[field] = dayjs();
-			time_zone = true;	
+			time_zone = true;
 		}else{
-			form_dict[field] = value.fixed_value;
+			form_dict[field] = value.default_value;
 		};
 	});
 	const initialFormData = Object.freeze(form_dict);
@@ -50,23 +51,33 @@ export default function Edit(fields) {
 	const [formData, updateFormData] = useState(initialFormData);
 	const [timezone, setTimezone] = React.useState('US/Pacific');
 	const [errorMessage, setErrorMessage] = useState('');
+	const [progress, setProgress] = useState(0);
 
 	useEffect(() => {
 		axiosInstance.get(`/${base_route}/` + id).then((response) => {
 			const data = {}; 
 			Object.entries(initialFormData).forEach(([key, _])=> {
-				data[key] = response.data[key];
+				if (key == 'result_kvp' && type_is(response.data[key]) === 'JSON'){
+					data[key] = JSON.stringify(response.data[key])? JSON.stringify(response.data[key]):'{}';
+				} else {
+					data[key] = response.data[key];
+				}
 			});
 			updateFormData(data);
 		});
 	}, [updateFormData]);
 
 	const handleChange = (e, myField) => {
-		if (myField && myField.includes(Constants.TIMESTRIN)){
+		if (myField && utils.is_time_field(myField)){
 			updateFormData({
 				...formData,
 				[myField]: utils.convert_tz(e, timezone),
 			});
+		}else if (myField && utils.is_file_upload(myField)){
+			updateFormData({
+			  ...formData,
+			  [e.target.name]: e.target.files[0],
+			});	
 		}else{
 			updateFormData({
 				...formData,
@@ -77,7 +88,11 @@ export default function Edit(fields) {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		axiosInstance.put(`/${base_route}/${id}/`, formData)
+		axiosInstance.put(`/${base_route}/${id}/`, formData, 
+		{headers: {'content-type': 'multipart/form-data'}, 
+		onUploadProgress : (progressEvent) => {
+			setProgress(Math.floor((progressEvent.loaded) / progressEvent.total * 100))}}
+		)
 		.then((response) => {
 			if (parent && parentID){
 				navigate({ pathname: `/${parent}/${parentID}/`}); 
@@ -106,50 +121,52 @@ export default function Edit(fields) {
 		});
 	};
 
-	const build_block = (field) =>{
-		const label = field[0];
-		const required = field[1].required_view;
-		const changable = field[1].fixed_value ? false : true;
-		if (label.includes(Constants.TIMESTRIN)){
-			return (
-				<Grid item xs={12} key={label}>
-					<LocalizationProvider dateAdapter={AdapterDayjs}>
-						<Stack spacing={13}>
-							<DateTimePicker
-							label={label}
-							value={formData[label]}
-							onChange={changable? (e)=>handleChange(e, label):null}
-							renderInput={
-								(params) => <TextField variant="outlined" required={required} {...params} />
-							}
-							/>
-						</Stack>
-					</LocalizationProvider>
-				</Grid>
-			);
-		}else{
-			return (
-				<Grid item xs={12} key={label}>
-					<TextField
-						variant="outlined"
-						required={required}
-						fullWidth
-						id={label}
-						label={label}
-						name={label}
-						value={formData[label]}
-						autoComplete={label}
-						onChange={changable? handleChange:null}
-						multiline={utils.multiRowsField(label)}
-						minRows={8}
-					/>
-				</Grid>
-			);
-		}
-	};
+	// const build_block = (field) =>{
+	// 	const label = field[0];
+	// 	const required = field[1].required_view;
+	// 	const changable = field[1].changable;
+	// 	// const value = (formData[label] && formData[label].length>0)? formData[label]:'None';
+	// 	const value = formData[label];
+	// 	if (label.includes(Constants.TIMESTRIN)){
+	// 		return (
+	// 			<Grid item xs={12} key={label}>
+	// 				<LocalizationProvider dateAdapter={AdapterDayjs}>
+	// 					<Stack spacing={13}>
+	// 						<DateTimePicker
+	// 						label={label}
+	// 						value={value}
+	// 						onChange={changable? (e)=>handleChange(e, label):null}
+	// 						renderInput={
+	// 							(params) => <TextField variant="outlined" required={required} {...params} />
+	// 						}
+	// 						/>
+	// 					</Stack>
+	// 				</LocalizationProvider>
+	// 			</Grid>
+	// 		);
+	// 	}else{
+	// 		return (
+	// 			<Grid item xs={12} key={label}>
+	// 				<TextField
+	// 					variant="outlined"
+	// 					required={required}
+	// 					fullWidth
+	// 					id={label}
+	// 					label={label}
+	// 					name={label}
+	// 					value={value}
+	// 					autoComplete={label}
+	// 					onChange={changable? handleChange:null}
+	// 					multiline={utils.multiRowsField(label)}
+	// 					minRows={8}
+	// 				/>
+	// 			</Grid>
+	// 		);
+	// 	}
+	// };
 
 	return (
-		<Container component="main" maxWidth="xs">
+		<Container component="main" maxWidth="sm">
 			<CssBaseline />
 			<div className={classes.paper}>
 				<Typography component="h1" variant="h5">
@@ -174,7 +191,7 @@ export default function Edit(fields) {
 						}
 						{ fields && 
 							Array.from(fields).map((field) => {
-								return build_block(field);
+								return CreateBlock(field, formData[field[0]], handleChange);
 							})
 						}
 					</Grid>
@@ -183,11 +200,13 @@ export default function Edit(fields) {
 						fullWidth
 						variant="contained"
 						color="primary"
-						className={classes.submit}
+						className={`${classes.uploadButton} ${classes.submit}`}
 						onClick={handleSubmit}
 					>
-						Update {base_route}
+						{/* Update {base_route} */}
+						Update
 					</Button>
+					{ProgressBar(progress)}
 				</form>
 			</div>
 				{ errorMessage &&

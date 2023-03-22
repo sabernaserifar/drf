@@ -4,6 +4,9 @@ import * as AiIcons from 'react-icons/ai';
 import * as IoIcons from 'react-icons/io';
 import * as GiIcons from 'react-icons/gi';
 import * as MdIcons from "react-icons/md";
+import * as BiIcons from "react-icons/bi";
+
+
 
 
 export const SidebarData = [
@@ -21,8 +24,8 @@ export const SidebarData = [
   },
 
   {
-    title: 'Runs',
-    path: '/runs',
+    title: 'Operarions',
+    path: '/operations',
     icon: <AiIcons.AiOutlineExperiment />,
     cName: 'nav-text'
   },
@@ -36,6 +39,12 @@ export const SidebarData = [
     title: 'Reactors',
     path: '/reactors',
     icon: <GiIcons.GiReactor />,
+    cName: 'nav-text'
+  },
+  {
+    title: 'Files',
+    path: '/file_uploads',
+    icon: <BiIcons.BiFile />,
     cName: 'nav-text'
   },
   {

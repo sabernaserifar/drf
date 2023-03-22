@@ -4,4 +4,7 @@ from .inventory import *
 from .purchase import *
 from .orders import *
 from .run import *
+from .operations import *
 from .sensor import *
+from .fielduploads import *
+from .search import * 

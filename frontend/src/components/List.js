@@ -40,7 +40,7 @@ const ItemsList = ({ posts, columns, base_route}) => {
 
 	return (
 		<React.Fragment>
-			<Container maxWidth="md" component="main">
+			<Container maxWidth="lg" component="main">
 				<Paper className={classes.root}>
 					<TableContainer className={classes.container}>
 						<Table stickyHeader aria-label="sticky table">
@@ -115,6 +115,7 @@ const ItemsList = ({ posts, columns, base_route}) => {
 											href={`/${base_route}/create/`}
 											variant="contained"
 											color="primary"
+											className={classes.uploadButton}
 										>
 											New {base_route}
 										</Button>

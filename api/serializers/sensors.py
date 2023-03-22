@@ -1,11 +1,11 @@
 from rest_framework import serializers
-from api.models import SensorReading, SensorFile
+from api.models import SensorReading, FileUpload
 from django.db import IntegrityError
 from rest_framework.exceptions import ValidationError
 
 class SensorFileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = SensorFile
+        model = FileUpload
         fields = '__all__'
 
 class BulkCreateUpdateListSerializer(serializers.ListSerializer):
