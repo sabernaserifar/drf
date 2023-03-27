@@ -31,6 +31,15 @@ export default function LinearWithValueLabel(progress) {
   return (
     <Box sx={{ width: '100%' }}>
       <LinearProgressWithLabel value={progress} />
+      { progress > 0 && progress < 50 && 
+        <Typography variant="body2" color="text.secondary">
+          Uploading data ...  
+        </Typography>}
+      {progress >= 50 && progress < 100 && 
+        <Typography variant="body2" color="text.secondary">
+          Data uploaded. Now, adding it to database. Please wait ...  
+        </Typography>
+      }
     </Box>
   );
 }

@@ -38,7 +38,7 @@ export function Detail () {
 	const children = [
 		{name: 'input_operations', label: 'Input', base_route: 'input_operations'},
 		{name: 'tags', label: 'Inventory', base_route: 'inventories'},
-		{name: 'timeseries', label: 'Sensor Data', base_route: 'sensor_readings'}
+		{name: 'timeseries', label: 'Sensor Data', base_route: 'sensors_data'}
 	]; 
 	const parents = [];
 	return ParentDetail(new Map(fields), children, parents);

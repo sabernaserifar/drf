@@ -22,6 +22,9 @@ class BulkCreateUpdateListSerializer(serializers.ListSerializer):
 
 class SensorReadingSerializer(serializers.ModelSerializer):
 
+    #sensor = serializers.SlugRelatedField(slug_field = 'sensor.label', read_only=True)
+    #sensor_label = serializers.CharField(source='sensor.label', required=False)
+
     def create(self, validated_data):
         instance = SensorReading(**validated_data)
 

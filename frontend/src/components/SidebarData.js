@@ -5,6 +5,12 @@ import * as IoIcons from 'react-icons/io';
 import * as GiIcons from 'react-icons/gi';
 import * as MdIcons from "react-icons/md";
 import * as BiIcons from "react-icons/bi";
+import * as GrIcons from "react-icons/gr";
+import * as TbIcons from "react-icons/tb";
+
+
+
+
 
 
 
@@ -30,21 +36,45 @@ export const SidebarData = [
     cName: 'nav-text'
   },
   {
-    title: 'Sensors',
-    path: '/sensors',
-    icon: <MdIcons.MdInsights />,
+    title: 'Equipment',
+    path: '/equipments',
+    icon: <GiIcons.GiReactor />,
     cName: 'nav-text'
   },
   {
-    title: 'Reactors',
-    path: '/reactors',
-    icon: <GiIcons.GiReactor />,
+    title: 'Maintenance',
+    path: '/maintenances',
+    icon: <GiIcons.GiAutoRepair />,
     cName: 'nav-text'
   },
   {
     title: 'Files',
     path: '/file_uploads',
     icon: <BiIcons.BiFile />,
+    cName: 'nav-text'
+  },
+  {
+    title: 'Sensors',
+    path: '/sensors_data',
+    icon: <MdIcons.MdInsights />,
+    cName: 'nav-text'
+  },
+  {
+    title: 'Customers',
+    path: '/customers',
+    icon: <FaIcons.FaPeopleArrows />,
+    cName: 'nav-text'
+  },
+  {
+    title: 'Orders',
+    path: '/orders',
+    icon: <AiIcons.  AiOutlineDollar />,
+    cName: 'nav-text'
+  },
+  {
+    title: 'Delivery',
+    path: '/deliveries',
+    icon: <TbIcons.TbTruckDelivery />,
     cName: 'nav-text'
   },
   {

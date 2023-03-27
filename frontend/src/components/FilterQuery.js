@@ -26,11 +26,21 @@ export default function FilterQuery(fields, query, setQuery) {
 
 	const handleChange = (e, myField) => {
 		console.log(myField)
+
 		if (myField && utils.is_date_field(myField)){
 			setQuery({
 			...query,
 			[myField]: utils.convert_tz(e, 'EST'),
 			});
+		}else if (myField && utils.is_sensor_label(myField)) {
+			const labels = []
+			e.map((item) => {
+				labels.push(item.label);
+			});
+			setQuery({
+				...query,
+				[myField]: labels
+				});
 		}else{
 			setQuery({
 			...query,
@@ -38,7 +48,6 @@ export default function FilterQuery(fields, query, setQuery) {
 			});
 		}
 	};
-
 
 	return (
 		<Container component="main" maxWidth="lg">
@@ -48,7 +57,7 @@ export default function FilterQuery(fields, query, setQuery) {
 
 			<Grid container spacing={2}>
 				{ fields && Array.from(fields).map((field) => {
-					return CreateBlock(field, query[field[0]], handleChange);
+					return CreateBlock(field, query[field[0]], handleChange );
 					})
 				}
 			</Grid>

@@ -4,7 +4,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 
 from api.models import Purchase, CustomerOrder, FileUpload
-from api.serializers import PurchaseSerializer, OrderSerializer # , UserSerializer
+from api.serializers import PurchaseSerializer # , UserSerializer
 
 
 class PurchaseViewSet(viewsets.ModelViewSet):

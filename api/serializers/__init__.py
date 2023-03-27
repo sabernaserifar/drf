@@ -6,3 +6,5 @@ from .runs import *
 from .operations import *
 from .sensors import * 
 from .fileuploads import *
+from .equipments import *
+from .maintenances import *

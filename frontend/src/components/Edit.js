@@ -5,6 +5,7 @@ import useStyles from './FormStyle';
 import * as utils from './utils';
 import CreateBlock from './CreateBlock';
 import ProgressBar from "./ProgressBar";
+import ErrorTextBox from './ErrorBox';
 
 
 //MaterialUI
@@ -57,7 +58,7 @@ export default function Edit(fields) {
 		axiosInstance.get(`/${base_route}/` + id).then((response) => {
 			const data = {}; 
 			Object.entries(initialFormData).forEach(([key, _])=> {
-				if (key == 'result_kvp' && type_is(response.data[key]) === 'JSON'){
+				if (key == 'supp_kvp' && type_is(response.data[key]) === 'JSON'){
 					data[key] = JSON.stringify(response.data[key])? JSON.stringify(response.data[key]):'{}';
 				} else {
 					data[key] = response.data[key];
@@ -209,7 +210,16 @@ export default function Edit(fields) {
 					{ProgressBar(progress)}
 				</form>
 			</div>
-				{ errorMessage &&
+			{ errorMessage && 
+				<Container maxWidth="md" component="main" style={{paddingTop: "50px"}}>
+					<div className="col-md-12">
+							<h3>Error</h3>
+					</div>
+					<ErrorTextBox errorMessage={errorMessage} setErrorMessage={setErrorMessage}/> 
+				</Container>
+      		} 
+			
+				{/* { errorMessage &&
 					<Container maxWidth="md" component="main" style={{paddingTop: "50px"}}>
 						<Typography key='error_head' component="h1" variant="h5" className={classes.error}>
 								Error:
@@ -221,7 +231,7 @@ export default function Edit(fields) {
 							</Typography>
 						)})}
 					</Container>
-				}
+				} */}
 		</Container>
 	);
 }

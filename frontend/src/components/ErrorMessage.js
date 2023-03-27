@@ -5,12 +5,11 @@ export function ProcessErrorMessage(error){
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
         console.log("Response Data:");
-        console.log(error.response.data);
-        if (type_is(error.response.data) == "Array"){
-            return {'message': `${error.message}. Check the Console for more details!`}
-        }
-        return error.response.data;
-        
+        console.log(error);
+        // if (type_is(error.response.data) == "Array"){
+        //     return {'message': `${error.message}. Check the Console for more details!`}
+        // }
+        return error.response;        
     } else if (error.request) {
         // The request was made but no response was received
         // `error.request` is an instance of XMLHttpRequest in the

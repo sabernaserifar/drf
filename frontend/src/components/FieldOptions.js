@@ -5,6 +5,7 @@ const FieldOptions = () => {
             'DATETIMESTRING': ['date'],
             'FILEUPLOAD': ['upload_file'],
             'FILESENSOR': ['sensor_file'],
+            'LABELSENSOR': ['sensor'],
             'FILEFIELD': ['file'],
             'MULTIROWS': ['description', 'Description', 'result_kvp'],
         }

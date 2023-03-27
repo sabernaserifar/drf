@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import PostLoadingComponent from './postLoading';
 import axiosInstance from "./axios";
-import ItemsList from "./List"; 
+import ItemsList from "./List";
+import SensorPlot from "./Plot/sensor_plot";
 import CreateBlock from "./CreateBlock";
 import dayjs from 'dayjs';
 import * as Constants from "./FieldOptions";
@@ -32,7 +33,7 @@ export default function Load(fields, filter_fields) {
 	let query_dict = {};
 	filter_fields.forEach((value, field) => {
 		if (utils.is_date_field(field)) {
-		  query_dict[field] = null; 
+		  query_dict[field] = null;
 		}else{
 		  query_dict[field] = value.default_value;
 		};
@@ -41,7 +42,11 @@ export default function Load(fields, filter_fields) {
 	const [query, setQuery] = useState(initialQuery);
 
     // useStates for GET requests 
-	const PostLoading = PostLoadingComponent(ItemsList);
+	let PostLoading = PostLoadingComponent(ItemsList);
+	if (base_route === 'sensors_data'){
+		PostLoading = PostLoadingComponent(SensorPlot);
+	};
+
 	const [appState, setAppState] = useState({
 		loading: true,
 		posts: null,
@@ -68,12 +73,20 @@ export default function Load(fields, filter_fields) {
 			<Typography component="h1" variant="h5">
 					Results 
 			</Typography>
+			{base_route === 'sensors_data' &&
+			<PostLoading
+				isLoading={appState.loading} 
+				posts={appState.posts} 
+				query={query}
+			/> }
+			{base_route != 'sensors_data' && 
 			<PostLoading
 						isLoading={appState.loading} 
 						posts={appState.posts} 
 						columns={columns} 
 						base_route={base_route}
 			/>
+			}
 		</Container>
 
 

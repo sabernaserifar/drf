@@ -71,7 +71,7 @@ export function Detail () {
 		{
 			name: 'sensor_operation', 
 			label: 'SensorFileUpload', 
-			base_route: 'sensor_readings',
+			base_route: 'sensors_data',
 			columns : ['id', 'fileupload.file_url'],
 		}
 	]; 

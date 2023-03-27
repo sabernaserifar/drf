@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import axiosInstance from './axios';
 import { useNavigate } from 'react-router-dom';
+import {ProcessErrorMessage} from './ErrorMessage';
+import ErrorTextBox from './ErrorBox';
+
+
 //MaterialUI
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -38,11 +42,13 @@ export default function SignUp() {
 	const navigate = useNavigate();
 	const initialFormData = Object.freeze({
 		email: '',
-		username: '',
 		password: '',
+		retypePassword: '',
 	});
 
 	const [formData, updateFormData] = useState(initialFormData);
+	const [errorMessage, setErrorMessage] = useState('');
+
 
 	const handleChange = (e) => {
 		updateFormData({
@@ -54,12 +60,14 @@ export default function SignUp() {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log(formData);
+		if (formData.password !== formData.retypePassword) {
+			console.log(formData.password, formData.retypePassword)
+			setErrorMessage({"data": "Passwords do not match"});
+		} else {
 
 		axiosInstance
 			.post(`user/create/`, {
 				email: formData.email,
-				user_name: formData.username,
 				password: formData.password,
 			})
 			.then((res) => {
@@ -67,25 +75,28 @@ export default function SignUp() {
 				console.log(res);
 				console.log(res.data);
 			})
-			.catch(function (error) {
-				if (error.response) {
-				  // The request was made and the server responded with a status code
-				  // that falls out of the range of 2xx
-				  console.log(error.response.data);
-				  console.log(error.response.status);
-				  console.log(error.response.headers);
-				} else if (error.request) {
-				  // The request was made but no response was received
-				  // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-				  // http.ClientRequest in node.js
-				  console.log(error.request);
-				} else {
-				  // Something happened in setting up the request that triggered an Error
-				  console.log('Error', error.message);
-				}
-				console.log(error.config);
-			  });
-	};
+			.catch((error) => {
+				setErrorMessage(ProcessErrorMessage(error));
+			})
+			// .catch(function (error) {
+			// 	if (error.response) {
+			// 	  // The request was made and the server responded with a status code
+			// 	  // that falls out of the range of 2xx
+			// 	  console.log(error.response.data);
+			// 	  console.log(error.response.status);
+			// 	  console.log(error.response.headers);
+			// 	} else if (error.request) {
+			// 	  // The request was made but no response was received
+			// 	  // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+			// 	  // http.ClientRequest in node.js
+			// 	  console.log(error.request);
+			// 	} else {
+			// 	  // Something happened in setting up the request that triggered an Error
+			// 	  console.log('Error', error.message);
+			// 	}
+			// 	console.log(error.config);
+			//   });
+	}};
 
 	const classes = useStyles();
 
@@ -116,18 +127,6 @@ export default function SignUp() {
 								variant="outlined"
 								required
 								fullWidth
-								id="username"
-								label="Username"
-								name="username"
-								autoComplete="username"
-								onChange={handleChange}
-							/>
-						</Grid>
-						<Grid item xs={12}>
-							<TextField
-								variant="outlined"
-								required
-								fullWidth
 								name="password"
 								label="Password"
 								type="password"
@@ -137,11 +136,24 @@ export default function SignUp() {
 							/>
 						</Grid>
 						<Grid item xs={12}>
+							<TextField
+								variant="outlined"
+								required
+								fullWidth
+								name="retypePassword"
+								label="Retype Password"
+								type="password"
+								id="retypePassword"
+								autoComplete="current-password"
+								onChange={handleChange}
+							/>
+						</Grid>
+						{/* <Grid item xs={12}>
 							<FormControlLabel
 								control={<Checkbox value="allowExtraEmails" color="primary" />}
 								label="I want to receive inspiration, marketing promotions and updates via email."
 							/>
-						</Grid>
+						</Grid> */}
 					</Grid>
 					<Button
 						type="submit"
@@ -155,13 +167,21 @@ export default function SignUp() {
 					</Button>
 					<Grid container >
 						<Grid item>
-							<Link href="#" variant="body2">
+							<Link href="/login" variant="body2">
 								Already have an account? Sign in
 							</Link>
 						</Grid>
 					</Grid>
 				</form>
 			</div>
+			{ errorMessage && 
+      			<Container maxWidth="md" component="main" style={{paddingTop: "50px"}}>
+              		<div className="col-md-12">
+                    	<h3>Error</h3>
+              		</div>
+            		<ErrorTextBox errorMessage={errorMessage} setErrorMessage={setErrorMessage}/> 
+         		</Container>
+      		} 
 		</Container>
 	);
 }

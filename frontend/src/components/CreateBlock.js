@@ -1,9 +1,11 @@
 import * as React from 'react';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import * as utils from './utils';
 import { sanitizer } from './utils';
 import useStyles from './FormStyle';
 import axiosInstance from './axios';
+import Select from 'react-select';
+import makeAnimated from 'react-select/animated';
 
 //MaterialUI
 import Button from '@material-ui/core/Button';
@@ -22,6 +24,8 @@ import { ClassNames } from '@emotion/react';
 import Link from '@material-ui/core/Link';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import type_is from './check_type';
+import { MultiSelect, MultiSelectProps } from '@uc-react-ui/multiselect';
+
 
 
 const object_length = (value) => {
@@ -42,7 +46,8 @@ const object_length = (value) => {
 };
 
 
-const CreateBlock = (field, value, handleChange) =>{  
+const CreateBlock = (field, value, handleChange) =>{ 
+  
     const label = field[0];
     const help_text = field[1].help_text
     const required = field[1].required_view;
@@ -74,6 +79,38 @@ const CreateBlock = (field, value, handleChange) =>{
           window.location.reload();
         });
     };
+
+    const animatedComponents = makeAnimated();
+
+    const [optionList, setOptionList] = useState([]);
+    useEffect(() => {
+      axiosInstance.get("/equipments")
+      .then((response) => {
+        const sensors = [];
+        response.data.map((sensor) =>{
+          if (sensor.equipment_type === "SENSOR"){
+            sensors.push({label: sensor.label, value: sensor.label});
+          }
+        })
+        setOptionList(sensors);
+      });
+  
+    }, []);
+
+
+
+    // Sensor label insert 
+    // const [sensor, setSensor] = useState([]);
+    // const  MultiSelectProps = {
+    //     label: 'Tags',
+    //     name: 'tags',
+    //     size: 'small',
+    //     optionList: sensorList,
+    //     placeholder: 'Add tags',
+    //     value: sensor,
+    //     valueChange: setSensor
+    // };
+
 
 
 
@@ -200,7 +237,23 @@ const CreateBlock = (field, value, handleChange) =>{
           </Box>
         <FormHelperText>{help_text}</FormHelperText>
       </Grid> 
-      )        
+      )
+              
+    }else if (utils.is_sensor_label(label)) {
+      return (
+        <Grid item xs={12} key={label} >
+          <Select
+          closeMenuOnSelect={false}
+          components={animatedComponents}
+          defaultValue={[optionList[0], optionList[1] ]}
+          isMulti
+          options={optionList}
+          onChange={e=>handleChange(e, label)}
+          /> 
+        </Grid> 
+
+
+      )
     }else{
       return (
         <Grid item xs={12} key={label}>

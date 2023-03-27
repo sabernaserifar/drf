@@ -9,6 +9,7 @@ import * as utils from './utils';
 import ShortDetail from "./ShortDetail";
 import type_is from "./check_type";
 import JasonTable from "./BuildJsonTable";
+import ErrorTextBox from "./ErrorBox";
 
 
 //MaterialUI

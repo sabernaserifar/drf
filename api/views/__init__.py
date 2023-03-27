@@ -8,3 +8,7 @@ from .operations import *
 from .sensor import *
 from .fielduploads import *
 from .search import * 
+from .csv_parsers import *
+from .equipment import *
+from .maintenance import *
+from .forgot_password import * 

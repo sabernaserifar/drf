@@ -1,7 +1,8 @@
 # not sure about the right import
-from api.models import Sensor, SensorReading, FileUpload, SensorFileOperation, Operation
+from api.models import Equipment, SensorReading, FileUpload, SensorFileOperation, Operation, EquipmentType
 import csv
-# import pandas as pd
+import pandas as pd
+import pytz
 from typing import Dict, List
 from rest_framework import viewsets, status, views
 from rest_framework.response import Response
@@ -48,7 +49,6 @@ class SensorFileOperationViewSet(viewsets.ModelViewSet):
     serializer_class = SensorFileOperationSerializer
     permissions_classes = [permissions.AllowAny]
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
 
 class SensorReadingViewSet(viewsets.ModelViewSet):
     queryset = SensorReading.objects.all()
@@ -102,6 +102,48 @@ class SensorFileViewSet(viewsets.ModelViewSet):
 
 
 
+def is_valid_queryparam(param):
+    return param != '' and param is not None
+
+
+def filter(request):
+    qs = SensorReading.objects.all()
+    sensor_labels = request.GET.getlist('sensor[]')
+    date_min = request.GET.get('date_min')
+    date_max = request.GET.get('date_max')
+
+    if is_valid_queryparam(date_min):
+        qs = qs.filter(time__gte=date_min)
+
+    if is_valid_queryparam(date_max):
+        qs = qs.filter(time__lt=date_max)
+
+
+    results = []
+    
+    if is_valid_queryparam(sensor_labels): 
+        for label in sensor_labels:
+            sensor_id = Equipment.objects.filter(label=label).first().id
+            results.append(qs.filter(sensor_id=sensor_id))
+    else:
+        results.append(qs)
+
+    return results
+
+
+def is_there_more_data(request):
+    offset = request.GET.get('offset')
+    if int(offset) > SensorReading.objects.all().count():
+        return False
+    return True
+
+
+def infinite_filter(request):
+    limit = request.GET.get('limit')
+    offset = request.GET.get('offset')
+    return SensorReading.objects.all()[int(offset): int(offset) + int(limit)]
+
+
 class RegisterDataViewSet(viewsets.ModelViewSet):
     queryset = SensorReading.objects.all()
     serializer_class = SensorReadingSerializer
@@ -123,7 +165,7 @@ class RegisterDataViewSet(viewsets.ModelViewSet):
             item = data_file[i]
             try:
                 sensor_name = item[0].strip()
-                sensor_id = Sensor.objects.filter(label=sensor_name.upper()).first().id
+                sensor_id = Equipment.objects.filter(label=sensor_name).first().id
             except:
                 return f'The sensor "{sensor_name}" at row {i+1} is not recognized.'
 
@@ -135,7 +177,7 @@ class RegisterDataViewSet(viewsets.ModelViewSet):
 
             
             try:
-                value = float(item[2].strip())
+                value = round(float(item[2].strip()), 4)
             except:
                 return f'The value "{value}" at row {i+1} is not valid number.'
         
@@ -149,6 +191,82 @@ class RegisterDataViewSet(viewsets.ModelViewSet):
             })
         
         return objects
+
+    # def _build_object(self, )
+
+
+
+    def _build_sensor_objects(self, data, parent_id, file_id):
+
+        df = pd.DataFrame(data[1:], columns=data[0])
+
+        # Dataframe cleanup 
+
+        timestamp_cols = [col for col in df.columns if 'Timestamp'.upper() in col.upper()]
+
+        if not timestamp_cols or len(timestamp_cols) > 1:
+            return f'There are {len(timestamp_cols)} columns that includes the "Timestamp" string. There should be only one.'
+
+        df = df.set_index(timestamp_cols[0])
+        timestamp = timestamp_cols[0]
+        # Drop invalid values and round to 4 
+        for col in df.columns:
+            if not col in timestamp_cols: 
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+        df = df.dropna().round(4)
+
+        # data_dict = df.to_dict()
+        objects = []
+        undefined_sensors = []
+        time_format = '%Y-%m-%d %H:%M:%S.%f'
+
+        for col in df.columns:
+            sensor_label = col.strip() 
+            sensor = Equipment.objects.filter(label=sensor_label)
+            # types = EquipmentType.objects.last()
+            # sensor_object = Equipment.objects.create(equipment_type=types, label=sensor_label)
+            if sensor:
+                sensor_id = sensor.first().id
+                for i in range(df.shape[0]):
+                    # timestamp = df.index[i].strftime(time_format).tz_convert(pytz.timezone('UTC'))
+                    objects.append({
+                            'operation': parent_id,
+                            'input_file': file_id, 
+                            'sensor': sensor_id,
+                            'time': df.index[i],
+                            'value': df[col].iloc[i],
+                        })
+        # for col in df.columns:
+        #     sensor_label = col.strip() 
+        #     sensor = Equipment.objects.filter(label=sensor_label)
+            
+        #     if True:
+        #         sensor_id = 1 #sensor.first().id
+        #         sensor_objects = df[[col, timestamp]].apply(lambda x: {
+        #                                 'operation': parent_id,
+        #                                 'input_file': file_id, 
+        #                                 'sensor': sensor_id,
+        #                                 'time': x[timestamp],
+        #                                 'value': sensor_id
+        #                                 })
+
+        #         objects.append(sensor_objects)
+
+
+                # objects.append(.values.tolist()) 
+
+                # for value in values:
+                #     objects.append({
+                #         'operation': parent_id,
+                #         'input_file': file_id, 
+                #         'sensor': sensor_id,
+                #         'time': df.index,
+                #         'value': value,
+                #     })
+            else:
+                undefined_sensors.append(sensor_label)
+
+        return objects, undefined_sensors
     
     
     def create(self, request, *args, **kwargs):
@@ -174,7 +292,7 @@ class RegisterDataViewSet(viewsets.ModelViewSet):
             return Response({'file': msg}, status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
 
-        objects = self.build_objects_list(csv_data, parent_id, file_object.id)
+        objects, _ = self._build_sensor_objects(csv_data, parent_id, file_object.id)
 
         if isinstance(objects, str):
             # Remove the object file and the storage 
@@ -189,87 +307,26 @@ class RegisterDataViewSet(viewsets.ModelViewSet):
         except:
             return Response({'sensor_file': 'Could not create sensor file operation object'}, status=status.HTTP_400_BAD_REQUEST)
         
-
         serializer = self.get_serializer(data=objects)
-        serializer.is_valid(raise_exception=True)
+        serializer.is_valid(raise_exception=True)        
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-# class RegisterData(views.APIView):
-#     parser_classes = (CSVTextParser, )
-#     # parser_classes = (CSVTextParser, FormParser, MultiPartParser)
+    def get_queryset(self):
+        qs = filter(self.request)
+        return qs
 
-#     def post(self, request, version=None):
-#         """
-#         Recieves a request body containing CSV, using the `text/csv` content-type, 
-#         as in: https://tools.ietf.org/html/rfc4180
-        
-#         Can also recieve a CSV file via 'multipart/form-data'.
-#         """
-#         content_type = request.content_type.split(';')[0].strip()
-#         encoding = 'utf-8'
-
-#         if content_type == 'text/csv':
-#             csv_table = request.data
-#             objects = []
-#             s1 = Sensor.objects.all().get(id=1)
-#             s2 = Sensor.objects.all().get(id=2)
-#             s3 = Sensor.objects.all().get(id=3)
-
-
-
-#             for i in range(0, len(csv_table)):
-               
-#                 data = csv_table[i]
-#                 # print(i, data)
-#                 if data[0] == 'sensorID2':
-#                     print('Found it =========================')
-#                     s_obj = s2
-#                 elif data[0] == 'sensorID3':
-#                     s_obj = s3
-#                 else:
-#                     s_obj = s1
-
-#                 objects.append(SensorReading(
-#                     time = pd.Timestamp(data[1], tz='UTC'),
-#                     sensor=s_obj,
-#                     value=float(data[2]),
-#                 ))
-
-#             # print(objects)
-#             SensorReading.objects.bulk_create(objects)
-#             print("DONE")
-            
-#             # In this example, we just return the parsed CSV data structure,
-#             # but in a view with an associated model and/or serializer we could
-#             # do something more interesting with it (eg create a new database record).
-#             return Response(csv_table, status=status.HTTP_200_OK)
-          
-#         elif content_type == 'multipart/form-data':
-#             fh = request.data.get('file', None)
-#             csv_table = fh.read().decode(encoding)
-#             return Response(csv_table, status=status.HTTP_200_OK)
-#         else:
-#             return Response(None, status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
-        
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#     # def post(self, request):
-    #     print('OOOOOOOKKKKKK')
-    #     print(self.request)
-    #     for file in request.FILES.values():
-    #         print(file)
-    #         reader = csv.reader(file)
-    #         objects = []
-    #         for row in reader:
-    #             objects.append(SensorReading(
-    #               city=row[0],
-    #               wheel_type=row[1],
-    #               # and so on ..
-    #             ))
-    #         SensorReading.objects.bulk_create(objects)
-
-    #     return Response({"success": "Good job, buddy"})
-
+    def list(self, request):
+        categorized_data = []
+        if not request.GET.getlist('sensor[]'):
+            return Response(categorized_data)
+        querysets = self.get_queryset()
+        for queryset in querysets:
+            serializer = self.get_serializer(queryset, many=True)
+            # Now find the unique sensors 
+            for label in request.GET.getlist('sensor[]'):
+                categorized_data.append([label, serializer.data])
+        return Response(categorized_data)
 

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axiosInstance from './axios';
 import {useNavigate, useParams} from 'react-router-dom';
 import useStyles from "./FormStyle";
@@ -17,6 +17,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import ProgressBar from "./ProgressBar";
 import { FormHelperText, FormControl } from '@mui/material';
+import ErrorTextBox from './ErrorBox';
 
 
 import {ProcessErrorMessage} from './ErrorMessage';
@@ -81,9 +82,10 @@ export default function Create(fields) {
     axiosInstance.post( `/${base_route}/`, formData,
     {headers: {'content-type': 'multipart/form-data'}, 
     onUploadProgress : (progressEvent) => {
-        setProgress(Math.floor((progressEvent.loaded) / progressEvent.total * 100))}}
+        setProgress(Math.floor((progressEvent.loaded) / progressEvent.total * 50))}}
     )
     .then((response) => {
+      // setProgress(100);
       if (parent && parentID){
         navigate({ pathname: `/${parent}/${parentID}/`}); 
       } else {
@@ -95,6 +97,8 @@ export default function Create(fields) {
       setErrorMessage(ProcessErrorMessage(error));
     })
   };
+
+  // console.log("Errror", JSON.stringify(errorMessage))
 
 
 	return (
@@ -147,9 +151,23 @@ export default function Create(fields) {
           {ProgressBar(progress)}
 				</FormControl>
 			</Grid>
-			{ errorMessage && 
-        <Container maxWidth="md" component="main" style={{paddingTop: "50px"}}>
-          <Typography key='error_head' component="h1" variant="h5" className={classes.error}>
+      { errorMessage && 
+      		<Container maxWidth="md" component="main" style={{paddingTop: "50px"}}>
+              <div className="col-md-12">
+                    <h3>Error</h3>
+              </div>
+            <ErrorTextBox errorMessage={errorMessage} setErrorMessage={setErrorMessage}/> 
+         </Container>
+      } 
+
+      
+			{/* { errorMessage && ErrorTextBox(errorMessage) }  */}
+        {/* <Container maxWidth="md" component="main" style={{paddingTop: "50px"}}> */}
+           
+            {/* {ErrorTextBox(errorMessage)} */}
+            {/* <ErrorTextBox errorResponse={errorMessage}/> */}
+
+          {/* <Typography key='error_head' component="h1" variant="h5" className={classes.error}>
               Error: 
           </Typography>
           { Object.keys(errorMessage).map((key) => {
@@ -159,9 +177,9 @@ export default function Create(fields) {
                 </Typography>
               )
             })
-          } 
-      </Container>  
-      }
+          }  */}
+      {/* </Container>  
+      } */}
 		</Container>
   );
 }

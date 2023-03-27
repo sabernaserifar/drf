@@ -55,6 +55,12 @@ export function is_file_sensor(label) {
   return check_field(label, 'FILESENSOR');
 };
 
+export function is_sensor_label(label) {
+  return check_field(label, 'LABELSENSOR');
+};
+
+
+
 
 
 
